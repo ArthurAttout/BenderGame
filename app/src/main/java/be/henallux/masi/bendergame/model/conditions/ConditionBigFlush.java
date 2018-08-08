@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import be.henallux.masi.bendergame.R;
 import be.henallux.masi.bendergame.model.EnumTypeCondition;
@@ -30,7 +31,15 @@ public class ConditionBigFlush implements Condition {
     public boolean isSatisfied(Collection<Integer> dices) {
 
         List<Integer> list = new ArrayList<>(dices);
-        Collections.sort(list, new Comparator<Integer>() {
+
+        HashMap<Integer,Integer> hash = new HashMap<>();
+        for (Integer integer : list) { //remove duplicates
+            hash.put(integer,0);
+        }
+
+        ArrayList<Integer> listNoDuplicates = new ArrayList<>(hash.keySet());
+
+        Collections.sort(listNoDuplicates, new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
                 if(o1 < o2) return -1;
@@ -39,20 +48,14 @@ public class ConditionBigFlush implements Condition {
             }
         });
 
-        HashMap<Integer,Integer> hash = new HashMap<>();
-        for (Integer integer : list) { //remove duplicates
-            hash.put(integer,0);
-        }
-
-
         int consecutiveIntervals = 0;
         int firstConsecutiveOccurence = -1;
 
-        for (int i = 0; i < hash.keySet().size(); i++) {
-            if(i+1 < hash.keySet().size()){
-                if(((int)hash.keySet().toArray()[i]+1 == (int)hash.keySet().toArray()[i+1])){
+        for (int i = 0; i < listNoDuplicates.size(); i++) {
+            if(i+1 < listNoDuplicates.size()){
+                if(((int)listNoDuplicates.toArray()[i]+1 == (int)listNoDuplicates.toArray()[i+1])){
                     if(consecutiveIntervals == 0)
-                        firstConsecutiveOccurence = (int)hash.keySet().toArray()[i];
+                        firstConsecutiveOccurence = (int)listNoDuplicates.toArray()[i];
                     consecutiveIntervals++;
                 }
             }

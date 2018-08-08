@@ -146,11 +146,11 @@ public class ConditionsUnitTest {
     @Test
     public void hasBigFlush() throws Exception {
         Condition c = new ConditionBigFlush(0);
-        assertEquals("6 5 4 3 satisfies big flush",true,c.isSatisfied(new ArrayList<Integer>(){{
-            add(6);
+        assertEquals("1 2 3 4 satisfies big flush",true,c.isSatisfied(new ArrayList<Integer>(){{
+            add(1);
             add(3);
+            add(2);
             add(4);
-            add(5);
         }}));
     }
 
