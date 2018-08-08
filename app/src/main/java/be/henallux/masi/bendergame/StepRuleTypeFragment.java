@@ -1,5 +1,6 @@
 package be.henallux.masi.bendergame;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,21 +17,21 @@ import com.stepstone.stepper.Step;
 import com.stepstone.stepper.VerificationError;
 
 import be.henallux.masi.bendergame.model.EnumTypeCondition;
-import be.henallux.masi.bendergame.utils.ConditionChangedNotifier;
+import be.henallux.masi.bendergame.viewmodel.CreateRuleViewModel;
 
 
 public class StepRuleTypeFragment extends Fragment implements Step {
 
     private OnTypeSelectedListener listener;
-    private ConditionChangedNotifier notifier;
     private Spinner ruleTypeSpinner;
+    private CreateRuleViewModel viewModel;
 
     @Override
     public VerificationError verifyStep() {
-        if(notifier != null){
-            EnumTypeConditionBinder selectedItem = (EnumTypeConditionBinder) ruleTypeSpinner.getSelectedItem();
-            notifier.onConditionTypeChanged(selectedItem.getType());
-        }
+
+        EnumTypeConditionBinder selectedItem = (EnumTypeConditionBinder) ruleTypeSpinner.getSelectedItem();
+        viewModel.chosenType.setValue(selectedItem.getType());
+
         return null;
     }
 
@@ -87,6 +88,8 @@ public class StepRuleTypeFragment extends Fragment implements Step {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
     }
 
     @Override
@@ -103,17 +106,12 @@ public class StepRuleTypeFragment extends Fragment implements Step {
         if (context instanceof OnTypeSelectedListener) {
             listener = (OnTypeSelectedListener) context;
         }
-
-        if (context instanceof ConditionChangedNotifier) {
-            notifier = (ConditionChangedNotifier) context;
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         listener = null;
-        notifier = null;
     }
 
     public class EnumTypeConditionBinder{

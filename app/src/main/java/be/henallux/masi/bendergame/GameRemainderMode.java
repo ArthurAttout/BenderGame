@@ -2,6 +2,7 @@ package be.henallux.masi.bendergame;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,6 +32,7 @@ import be.henallux.masi.bendergame.model.Game;
 import be.henallux.masi.bendergame.model.Rule;
 import be.henallux.masi.bendergame.utils.Constants;
 import be.henallux.masi.bendergame.utils.RandomString;
+import be.henallux.masi.bendergame.viewmodel.GameRemainderViewModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -43,10 +45,8 @@ public class GameRemainderMode extends AppCompatActivity {
     TabLayout tabLayout;
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
-    private Game currentGame;
     private final DatabaseReference firebaseDatabase = FirebaseDatabase.getInstance().getReference();
-    private FragmentDiceChecker fragmentDiceChecker;
-    private FragmentCurrentRules fragmentCurrentRules;
+    private GameRemainderViewModel gameRemainderViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +55,13 @@ public class GameRemainderMode extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        currentGame = getIntent().getParcelableExtra(Constants.EXTRA_GAME_KEY);
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(),currentGame);
+        Game currentGame = getIntent().getParcelableExtra(Constants.EXTRA_GAME_KEY);
+        gameRemainderViewModel = ViewModelProviders.of(this).get(GameRemainderViewModel.class);
+        gameRemainderViewModel.currentGameLiveData.setValue(currentGame);
+
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -85,19 +89,14 @@ public class GameRemainderMode extends AppCompatActivity {
             public void onPageScrollStateChanged(int state) {}
         });
 
-        firebaseDatabase.child("games").child(currentGame.getID()).addValueEventListener(new ValueEventListener() {
+
+
+        firebaseDatabase.child("games").child(gameRemainderViewModel.currentGameLiveData.getValue().getID()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Map opts = (Map)dataSnapshot.getValue();
-                currentGame = Game.fromDataSnapshot(opts);
-
-                if(fragmentCurrentRules != null){
-                    fragmentCurrentRules.onCurrentGameChanged(currentGame);
-                }
-
-                if(fragmentDiceChecker != null){
-                    fragmentDiceChecker.onCurrentGameChanged(currentGame);
-                }
+                Game currentGame = Game.fromDataSnapshot(opts);
+                gameRemainderViewModel.currentGameLiveData.setValue(currentGame);
             }
 
             @Override
@@ -119,6 +118,7 @@ public class GameRemainderMode extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.action_add_rule:
                 Intent i = new Intent(this, CreateRuleActivity.class);
+                i.putExtra(Constants.EXTRA_GAME_KEY,gameRemainderViewModel.currentGameLiveData.getValue());
                 startActivityForResult(i,Constants.REQUEST_CODE_CREATE_RULE);
         }
         return super.onOptionsItemSelected(item);
@@ -131,7 +131,7 @@ public class GameRemainderMode extends AppCompatActivity {
                 Rule rule = data.getParcelableExtra(Constants.EXTRA_RULE_KEY);
                 firebaseDatabase
                         .child("games")
-                        .child(currentGame.getID())
+                        .child(gameRemainderViewModel.currentGameLiveData.getValue().getID())
                         .child("rules")
                         .child(new RandomString(13).nextString())
                         .setValue(rule.getHashMap());
@@ -141,23 +141,19 @@ public class GameRemainderMode extends AppCompatActivity {
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        private Game currentGame;
 
-        public SectionsPagerAdapter(FragmentManager fm, Game currentGame) {
+        public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
-            this.currentGame = currentGame;
         }
 
         @Override
         public Fragment getItem(int position) {
             switch(position){
                 case 0:
-                    fragmentCurrentRules = FragmentCurrentRules.newInstance(currentGame);
-                    return fragmentCurrentRules;
+                    return FragmentCurrentRules.newInstance();
 
                 case 1:
-                    fragmentDiceChecker = FragmentDiceChecker.newInstance(currentGame);
-                    return fragmentDiceChecker;
+                    return FragmentDiceChecker.newInstance();
             }
             throw new IllegalStateException("Unrecognized viewpager position");
         }

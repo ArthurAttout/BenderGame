@@ -1,6 +1,7 @@
 package be.henallux.masi.bendergame;
 
 import android.app.Activity;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.IntRange;
@@ -9,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -35,11 +35,11 @@ import be.henallux.masi.bendergame.model.conditions.ConditionSumEqual;
 import be.henallux.masi.bendergame.model.conditions.ConditionSumEqualOrBelow;
 import be.henallux.masi.bendergame.model.conditions.ConditionSumEqualOrGreater;
 import be.henallux.masi.bendergame.model.conditions.ConditionTriple;
-import be.henallux.masi.bendergame.utils.ConditionChangedNotifier;
 import be.henallux.masi.bendergame.utils.Constants;
 import be.henallux.masi.bendergame.utils.OnFragmentInteractionListener;
+import be.henallux.masi.bendergame.viewmodel.CreateRuleViewModel;
 
-public class CreateRuleActivity extends AppCompatActivity implements Validator.ValidationListener, StepRuleTypeFragment.OnTypeSelectedListener, OnFragmentInteractionListener, StepperLayout.StepperListener, ConditionChangedNotifier{
+public class CreateRuleActivity extends AppCompatActivity implements Validator.ValidationListener, StepRuleTypeFragment.OnTypeSelectedListener, OnFragmentInteractionListener, StepperLayout.StepperListener{
 
     private Validator validator;
     private Spinner ruleTypeSpinner;
@@ -47,11 +47,8 @@ public class CreateRuleActivity extends AppCompatActivity implements Validator.V
     private View view;
     private StepRuleTypeFragment.OnTypeSelectedListener listener;
     private StepRuleValueFragment stepValue;
-    
-    private String title;
-    private EnumTypeCondition type;
-    private int value;
-    private String outcome;
+
+    private CreateRuleViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +61,8 @@ public class CreateRuleActivity extends AppCompatActivity implements Validator.V
 
         validator = new Validator(this);
         validator.setValidationListener(this);
+
+        viewModel = ViewModelProviders.of(this).get(CreateRuleViewModel.class);
     }
 
     @Override
@@ -95,6 +94,9 @@ public class CreateRuleActivity extends AppCompatActivity implements Validator.V
     public void onCompleted(View completeButton) {
         
         Condition resultingCondition = null;
+        EnumTypeCondition type = viewModel.chosenType.getValue();
+        int value = viewModel.chosenValue.getValue();
+        Rule newRule = viewModel.newRule.getValue();
 
         switch (type){
 
@@ -130,7 +132,7 @@ public class CreateRuleActivity extends AppCompatActivity implements Validator.V
                 break;
         }
 
-        Rule resultingRule = new Rule(resultingCondition,outcome,title);
+        Rule resultingRule = new Rule(resultingCondition,newRule.getOutcome(),newRule.getTitle());
         Intent returnIntent = new Intent();
         returnIntent.putExtra(Constants.EXTRA_RULE_KEY,resultingRule);
         setResult(Activity.RESULT_OK,returnIntent);
@@ -206,29 +208,9 @@ public class CreateRuleActivity extends AppCompatActivity implements Validator.V
         }
     }
 
-
+    //To handle the EditorAction of editText
     @Override
     public void onProceed() {
         mStepperLayout.proceed();
-    }
-
-    @Override
-    public void onConditionTitleChanged(String title) {
-        this.title = title;
-    }
-
-    @Override
-    public void onConditionTypeChanged(EnumTypeCondition type) {
-        this.type = type;
-    }
-
-    @Override
-    public void onConditionValueChanged(int value) {
-        this.value = value;
-    }
-
-    @Override
-    public void onConditionOutcomeChanged(String outcome) {
-        this.outcome = outcome;
     }
 }

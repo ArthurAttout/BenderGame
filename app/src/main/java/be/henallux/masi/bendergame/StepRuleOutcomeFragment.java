@@ -1,7 +1,6 @@
 package be.henallux.masi.bendergame;
 
-import android.content.Context;
-import android.net.Uri;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
@@ -14,13 +13,13 @@ import android.widget.EditText;
 import com.stepstone.stepper.Step;
 import com.stepstone.stepper.VerificationError;
 
-import be.henallux.masi.bendergame.utils.ConditionChangedNotifier;
+import be.henallux.masi.bendergame.viewmodel.CreateRuleViewModel;
 
 public class StepRuleOutcomeFragment extends Fragment implements Step {
 
     private EditText editTextRuleOutcome;
     private TextInputLayout textInputRuleOutcome;
-    private ConditionChangedNotifier notifier;
+    private CreateRuleViewModel viewModel;
 
     @Override
     public VerificationError verifyStep() {
@@ -28,7 +27,7 @@ public class StepRuleOutcomeFragment extends Fragment implements Step {
             return new VerificationError(getString(R.string.error_mandatory_field));
         }
 
-        notifier.onConditionOutcomeChanged(editTextRuleOutcome.getText().toString());
+        viewModel.newRule.getValue().setOutcome(editTextRuleOutcome.getText().toString());
         return null;
     }
 
@@ -54,26 +53,15 @@ public class StepRuleOutcomeFragment extends Fragment implements Step {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        notifier = null;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if(context instanceof ConditionChangedNotifier){
-            notifier = (ConditionChangedNotifier)context;
-        }
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_step_rule_outcome, container, false);
         textInputRuleOutcome = v.findViewById(R.id.textInputLayoutOutcome);
         editTextRuleOutcome = v.findViewById(R.id.editTextRuleOutcome);
+
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
+
         return v;
     }
 }

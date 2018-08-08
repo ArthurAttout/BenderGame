@@ -45,6 +45,18 @@ public class Rule implements Parcelable {
         title = in.readString();
     }
 
+    public void setCondition(Condition condition) {
+        this.condition = condition;
+    }
+
+    public void setOutcome(String outcome) {
+        this.outcome = outcome;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     @Override
     public int describeContents() {
         return 0;

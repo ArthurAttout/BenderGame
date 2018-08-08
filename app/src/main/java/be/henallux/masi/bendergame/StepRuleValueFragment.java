@@ -1,14 +1,11 @@
 package be.henallux.masi.bendergame;
 
-import android.content.Context;
-import android.net.Uri;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
-import android.support.design.widget.TextInputLayout;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +23,7 @@ import java.util.ArrayList;
 import be.henallux.masi.bendergame.model.EnumTypeCondition;
 import be.henallux.masi.bendergame.model.conditions.Condition;
 import be.henallux.masi.bendergame.model.conditions.ConditionBigFlush;
+import be.henallux.masi.bendergame.model.conditions.ConditionContains;
 import be.henallux.masi.bendergame.model.conditions.ConditionDouble;
 import be.henallux.masi.bendergame.model.conditions.ConditionQuadruple;
 import be.henallux.masi.bendergame.model.conditions.ConditionSmallFlush;
@@ -33,13 +31,12 @@ import be.henallux.masi.bendergame.model.conditions.ConditionSumEqual;
 import be.henallux.masi.bendergame.model.conditions.ConditionSumEqualOrBelow;
 import be.henallux.masi.bendergame.model.conditions.ConditionSumEqualOrGreater;
 import be.henallux.masi.bendergame.model.conditions.ConditionTriple;
-import be.henallux.masi.bendergame.utils.ConditionChangedNotifier;
-import be.henallux.masi.bendergame.utils.OnFragmentInteractionListener;
+import be.henallux.masi.bendergame.viewmodel.CreateRuleViewModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class StepRuleValueFragment extends Fragment implements Step, StepRuleTypeFragment.OnTypeSelectedListener {
+public class StepRuleValueFragment extends Fragment implements Step {
 
     @BindView(R.id.spinnerRuleValue1)
     Spinner spinnerValue1;
@@ -56,8 +53,7 @@ public class StepRuleValueFragment extends Fragment implements Step, StepRuleTyp
     @BindView(R.id.textViewRulePreview)
     TextView textViewRulePreview;
 
-    private ConditionChangedNotifier notifier;
-    private EnumTypeCondition currentType;
+    private CreateRuleViewModel viewModel;
 
     @Override
     public VerificationError verifyStep() {
@@ -87,18 +83,9 @@ public class StepRuleValueFragment extends Fragment implements Step, StepRuleTyp
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if(context instanceof ConditionChangedNotifier){
-            notifier = (ConditionChangedNotifier)context;
-        }
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
         listener = null;
-        notifier = null;
     }
 
     @Override
@@ -115,12 +102,20 @@ public class StepRuleValueFragment extends Fragment implements Step, StepRuleTyp
         spinnerValue2.setOnItemSelectedListener(listener);
         spinnerValue3.setOnItemSelectedListener(listener);
         spinnerValue4.setOnItemSelectedListener(listener);
+
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
+        viewModel.chosenType.observe(this, new Observer<EnumTypeCondition>() {
+            @Override
+            public void onChanged(@Nullable EnumTypeCondition enumTypeCondition) {
+                onTypeSelected(enumTypeCondition);
+            }
+        });
+
         return v;
     }
 
     private SpinnerListener listener;
 
-    @Override
     public void onTypeSelected(EnumTypeCondition type) {
 
         listener.setTypeCondition(type);
@@ -240,8 +235,7 @@ public class StepRuleValueFragment extends Fragment implements Step, StepRuleTyp
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             Condition resultingCondition = null;
-            String value = (String)parent.getSelectedItem();
-            int valueInt = value.equals(resourceStringDefault) ? 0 : Integer.valueOf(value);
+            int valueInt = getValueInt(parent);
 
             switch (typeCondition){
 
@@ -255,7 +249,13 @@ public class StepRuleValueFragment extends Fragment implements Step, StepRuleTyp
                     resultingCondition = new ConditionSumEqualOrGreater(valueInt);
                     break;
                 case CONTAINS:
-                    //TODO
+                    ArrayList<Integer> values = new ArrayList<Integer>(){{
+                        add(getValueInt(spinnerValue1));
+                        add(getValueInt(spinnerValue2));
+                        add(getValueInt(spinnerValue3));
+                        add(getValueInt(spinnerValue4));
+                    }};
+                    resultingCondition = new ConditionContains(values);
                     break;
                 case DOUBLE_DOUBLE:
                     //TODO
@@ -279,9 +279,12 @@ public class StepRuleValueFragment extends Fragment implements Step, StepRuleTyp
             if(resultingCondition != null)
                 textViewRulePreview.setText(resultingCondition.toString(StepRuleValueFragment.this.getContext()));
 
-            if(notifier != null){
-                notifier.onConditionValueChanged(valueInt);
-            }
+            viewModel.chosenValue.setValue(valueInt);
+        }
+
+        private int getValueInt(AdapterView<?> parent) {
+            String value = (String)parent.getSelectedItem();
+            return value.equals(resourceStringDefault) ? 0 : Integer.valueOf(value);
         }
 
         @Override

@@ -1,5 +1,7 @@
 package be.henallux.masi.bendergame;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -26,6 +28,7 @@ import be.henallux.masi.bendergame.model.Game;
 import be.henallux.masi.bendergame.model.Rule;
 import be.henallux.masi.bendergame.utils.Constants;
 import be.henallux.masi.bendergame.utils.OnFragmentInteractionListener;
+import be.henallux.masi.bendergame.viewmodel.GameRemainderViewModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -35,31 +38,28 @@ public class FragmentCurrentRules extends Fragment {
     @BindView(R.id.recyclerViewRules)
     RecyclerView recyclerViewRules;
 
-    private Game currentGame;
     private RulesAdapter adapter;
-
-    public void onCurrentGameChanged(Game newCurrentGame){
-        if(adapter != null)
-            adapter.setRules(newCurrentGame.getRules());
-        this.currentGame = currentGame;
-    }
+    private GameRemainderViewModel gameRemainderViewModel;
 
     public FragmentCurrentRules() {}
 
-    public static FragmentCurrentRules newInstance(Game currentGame) {
-        FragmentCurrentRules fragment = new FragmentCurrentRules();
-        Bundle args = new Bundle();
-        args.putParcelable(Constants.EXTRA_GAME_KEY_FRAGMENT, currentGame);
-        fragment.setArguments(args);
-        return fragment;
+    public static FragmentCurrentRules newInstance() {
+        return new FragmentCurrentRules();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            currentGame = getArguments().getParcelable(Constants.EXTRA_GAME_KEY_FRAGMENT);
-        }
+        gameRemainderViewModel = ViewModelProviders.of(getActivity()).get(GameRemainderViewModel.class);
+        gameRemainderViewModel.currentGameLiveData.observe(this, new Observer<Game>() {
+            @Override
+            public void onChanged(@Nullable Game game) {
+                if(game != null){
+                    if(adapter != null)
+                        adapter.setRules(game.getRules());
+                }
+            }
+        });
     }
 
     @Override
@@ -67,7 +67,7 @@ public class FragmentCurrentRules extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerViewRules.setLayoutManager(new LinearLayoutManager(this.getContext()));
-        adapter = new RulesAdapter(currentGame.getRules());
+        adapter = new RulesAdapter(gameRemainderViewModel.currentGameLiveData.getValue().getRules());
         recyclerViewRules.setAdapter(adapter);
     }
 

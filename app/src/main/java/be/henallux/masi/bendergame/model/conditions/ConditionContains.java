@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import be.henallux.masi.bendergame.R;
 import be.henallux.masi.bendergame.model.EnumTypeCondition;
@@ -22,6 +23,11 @@ public class ConditionContains implements Condition, Parcelable {
 
     public ConditionContains(ArrayList<Integer> value) {
         this.value = value;
+        Iterator<Integer> iterator = value.iterator();
+        while(iterator.hasNext()){
+            if(iterator.next() == 0)
+                iterator.remove();
+        }
     }
 
     @Override
@@ -63,12 +69,14 @@ public class ConditionContains implements Condition, Parcelable {
         @Override
         public ConditionContains[] newArray(int size) {
             return new ConditionContains[size];
-        }
+    }
     };
 
 
     public String toString(Context ctx) {
         switch (value.size()){
+            case 0:
+                return "";
             case 1:
                 return ctx.getString(R.string.prefix_condition_contains_1,value.get(0));
             case 2:

@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -20,13 +19,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import be.henallux.masi.bendergame.model.EnumTypeCondition;
 import be.henallux.masi.bendergame.model.Game;
-import be.henallux.masi.bendergame.utils.ConditionChangedNotifier;
 import be.henallux.masi.bendergame.utils.EnumMode;
 import be.henallux.masi.bendergame.utils.RandomString;
 import butterknife.BindView;

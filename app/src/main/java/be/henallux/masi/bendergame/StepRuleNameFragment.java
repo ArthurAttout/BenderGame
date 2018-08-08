@@ -1,8 +1,8 @@
 package be.henallux.masi.bendergame;
 
 import android.app.Activity;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
@@ -18,8 +18,8 @@ import android.widget.TextView;
 import com.stepstone.stepper.Step;
 import com.stepstone.stepper.VerificationError;
 
-import be.henallux.masi.bendergame.utils.ConditionChangedNotifier;
 import be.henallux.masi.bendergame.utils.OnFragmentInteractionListener;
+import be.henallux.masi.bendergame.viewmodel.CreateRuleViewModel;
 
 
 public class StepRuleNameFragment extends Fragment implements Step {
@@ -27,15 +27,15 @@ public class StepRuleNameFragment extends Fragment implements Step {
     private TextInputLayout textInputRuleTitle;
     private EditText editTextRuleTitle;
     private OnFragmentInteractionListener proceedListener;
-    private ConditionChangedNotifier notifier;
+    private CreateRuleViewModel viewModel;
 
     @Override
     public VerificationError verifyStep() {
         if(editTextRuleTitle.getText().toString().equals("")){
             return new VerificationError(getString(R.string.error_mandatory_field));
         }
-        if(notifier != null)
-            notifier.onConditionTitleChanged(editTextRuleTitle.getText().toString());
+
+        viewModel.newRule.getValue().setTitle(editTextRuleTitle.getText().toString());
 
         return null;
     }
@@ -68,17 +68,12 @@ public class StepRuleNameFragment extends Fragment implements Step {
         if(context instanceof OnFragmentInteractionListener){
             proceedListener = (OnFragmentInteractionListener) context;
         }
-
-        if(context instanceof ConditionChangedNotifier){
-            notifier = (ConditionChangedNotifier)context;
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         proceedListener = null;
-        notifier = null;
     }
 
     @Override
@@ -86,6 +81,9 @@ public class StepRuleNameFragment extends Fragment implements Step {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_step_rule_name, container, false);
         //initialize your UI
+
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
+
         textInputRuleTitle = v.findViewById(R.id.textInputLayoutRuleTitle);
         editTextRuleTitle = v.findViewById(R.id.editTextRuleName);
         editTextRuleTitle.setOnEditorActionListener(new TextView.OnEditorActionListener() {

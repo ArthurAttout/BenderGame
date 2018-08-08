@@ -1,7 +1,7 @@
 package be.henallux.masi.bendergame;
 
-import android.content.Context;
-import android.net.Uri;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -17,16 +18,17 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import be.henallux.masi.bendergame.model.Game;
+import be.henallux.masi.bendergame.model.Rule;
 import be.henallux.masi.bendergame.utils.Constants;
-import be.henallux.masi.bendergame.utils.DiceCheckerSpinnerListener;
-import be.henallux.masi.bendergame.utils.OnFragmentInteractionListener;
+import be.henallux.masi.bendergame.viewmodel.GameRemainderViewModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class FragmentDiceChecker extends Fragment implements DiceCheckerSpinnerListener.DiceChangedNotifier {
+public class FragmentDiceChecker extends Fragment {
 
     @BindView(R.id.spinner1)
     Spinner spinner1;
@@ -46,26 +48,26 @@ public class FragmentDiceChecker extends Fragment implements DiceCheckerSpinnerL
     @BindView(R.id.imageButtonHelp)
     ImageButton imageButtonHelp;
 
-    private Game currentGame;
-    private DiceCheckerSpinnerListener listener;
+    private GameRemainderViewModel gameRemainderViewModel;
 
     public FragmentDiceChecker() {}
 
 
-    public static FragmentDiceChecker newInstance(Game currentGame) {
-        FragmentDiceChecker fragment = new FragmentDiceChecker();
-        Bundle args = new Bundle();
-        args.putParcelable(Constants.EXTRA_GAME_KEY_FRAGMENT, currentGame);
-        fragment.setArguments(args);
-        return fragment;
+    public static FragmentDiceChecker newInstance() {
+        return new FragmentDiceChecker();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            currentGame = getArguments().getParcelable(Constants.EXTRA_GAME_KEY_FRAGMENT);
-        }
+
+        gameRemainderViewModel = ViewModelProviders.of(getActivity()).get(GameRemainderViewModel.class);
+        gameRemainderViewModel.outcome.observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String newOutcome) {
+                textViewOutcome.setText(newOutcome);
+            }
+        });
     }
 
     @Override
@@ -76,6 +78,8 @@ public class FragmentDiceChecker extends Fragment implements DiceCheckerSpinnerL
         ButterKnife.bind(this,view);
         return view;
     }
+
+    private HashMap<Integer,Integer> hashMapViewInteger = new HashMap<>();
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -91,12 +95,30 @@ public class FragmentDiceChecker extends Fragment implements DiceCheckerSpinnerL
         spinner3.setAdapter(getSpinnerAdapter(values));
         spinner4.setAdapter(getSpinnerAdapter(values));
 
-        listener = new DiceCheckerSpinnerListener(this, currentGame);
+        AdapterView.OnItemSelectedListener lst = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                hashMapViewInteger.put(parent.getId(),position+1);
+                if(hashMapViewInteger.size() == 4){
 
-        spinner1.setOnItemSelectedListener (listener);
-        spinner2.setOnItemSelectedListener (listener);
-        spinner3.setOnItemSelectedListener (listener);
-        spinner4.setOnItemSelectedListener (listener);
+                    String outcome = "";
+                    for (Rule rule : gameRemainderViewModel.currentGameLiveData.getValue().getRules()) {
+                        if(rule.getCondition().isSatisfied(hashMapViewInteger.values())){
+                            outcome += rule.getOutcome() + "\n";
+                        }
+                    }
+                    gameRemainderViewModel.outcome.setValue(outcome.equals("") ? "Rien." : outcome);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        };
+
+        spinner1.setOnItemSelectedListener(lst);
+        spinner2.setOnItemSelectedListener(lst);
+        spinner3.setOnItemSelectedListener(lst);
+        spinner4.setOnItemSelectedListener(lst);
 
         imageButtonHelp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,16 +136,5 @@ public class FragmentDiceChecker extends Fragment implements DiceCheckerSpinnerL
         ArrayAdapter<String> itemsAdapter =  new ArrayAdapter<>(this.getContext(), R.layout.spinner_dropdown_dice_value, values);
         itemsAdapter.setDropDownViewResource(R.layout.spinner_dropdown_dice_value);
         return itemsAdapter;
-    }
-
-    @Override
-    public void diceChanged(String rulesToShow) {
-        textViewOutcome.setText(rulesToShow);
-    }
-
-    public void onCurrentGameChanged(Game currentGame){
-        this.currentGame = currentGame;
-        if(listener != null)
-            listener.setCurrentGame(currentGame);
     }
 }
