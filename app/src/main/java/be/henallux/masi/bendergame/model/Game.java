@@ -90,6 +90,8 @@ public class Game implements Parcelable {
     private static ArrayList<Rule> getRulesFromRemainder(HashMap<Long,Map> rules) {
 
         ArrayList<Rule> rulesModel = new ArrayList<>();
+        if(rules == null)
+            return rulesModel;
 
         for (Map o : rules.values()) {
             if(o == null) continue;

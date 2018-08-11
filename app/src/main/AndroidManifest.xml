@@ -29,7 +29,9 @@
             android:name=".GameNoRealDiceMode"
             android:label="@string/title_activity_game_no_real_dice_mode"
             android:theme="@style/DefaultBackgroundTheme" />
-        <activity android:name=".CreateRuleActivity"></activity>
+        <activity
+            android:name=".CreateRuleActivity"
+            android:windowSoftInputMode="adjustPan"/>
     </application>
 
 </manifest>
