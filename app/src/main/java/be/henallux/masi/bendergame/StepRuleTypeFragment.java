@@ -1,5 +1,6 @@
 package be.henallux.masi.bendergame;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
@@ -16,6 +17,8 @@ import android.widget.Spinner;
 import com.stepstone.stepper.Step;
 import com.stepstone.stepper.VerificationError;
 
+import java.util.ArrayList;
+
 import be.henallux.masi.bendergame.model.EnumTypeCondition;
 import be.henallux.masi.bendergame.viewmodel.CreateRuleViewModel;
 
@@ -25,6 +28,7 @@ public class StepRuleTypeFragment extends Fragment implements Step {
     private OnTypeSelectedListener listener;
     private Spinner ruleTypeSpinner;
     private CreateRuleViewModel viewModel;
+    private ArrayList<EnumTypeConditionBinder> array;
 
     @Override
     public VerificationError verifyStep() {
@@ -62,18 +66,18 @@ public class StepRuleTypeFragment extends Fragment implements Step {
         super.onViewCreated(view, savedInstanceState);
 
         ruleTypeSpinner = view.findViewById(R.id.spinnerRuleType);
-        EnumTypeConditionBinder[] array = {
-                new EnumTypeConditionBinder(this.getActivity(),EnumTypeCondition.DOUBLE),
-                new EnumTypeConditionBinder(this.getActivity(),EnumTypeCondition.TRIPLE),
-                new EnumTypeConditionBinder(this.getActivity(),EnumTypeCondition.QUADRUPLE),
-                new EnumTypeConditionBinder(this.getActivity(),EnumTypeCondition.DOUBLE_DOUBLE),
-                new EnumTypeConditionBinder(this.getActivity(),EnumTypeCondition.SUM_EQUAL),
-                new EnumTypeConditionBinder(this.getActivity(),EnumTypeCondition.SUM_EQUAL_OR_BELOW),
-                new EnumTypeConditionBinder(this.getActivity(),EnumTypeCondition.SUM_EQUAL_OR_GREATER),
-                new EnumTypeConditionBinder(this.getActivity(),EnumTypeCondition.CONTAINS),
-                new EnumTypeConditionBinder(this.getActivity(),EnumTypeCondition.BIG_FLUSH),
-                new EnumTypeConditionBinder(this.getActivity(),EnumTypeCondition.SMALL_FLUSH),
-        };
+        array = new ArrayList<EnumTypeConditionBinder>(){{
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.DOUBLE));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.TRIPLE));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.QUADRUPLE));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.DOUBLE_DOUBLE));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.SUM_EQUAL));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.SUM_EQUAL_OR_BELOW));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.SUM_EQUAL_OR_GREATER));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.CONTAINS));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.BIG_FLUSH));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.SMALL_FLUSH));
+        }};
         ArrayAdapter spinnerArrayAdapter = new ArrayAdapter(this.getActivity(),R.layout.spinner_dropdown_rule_type, array);
         ruleTypeSpinner.setAdapter(spinnerArrayAdapter);
         ruleTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -89,15 +93,25 @@ public class StepRuleTypeFragment extends Fragment implements Step {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
+        if(viewModel.chosenType.getValue() != null){
+            ruleTypeSpinner.setSelection(getIndexOf(viewModel.chosenType.getValue()));
+        }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
+        viewModel.chosenType.observe(this,type ->
+            ruleTypeSpinner.setSelection(getIndexOf(type))
+        );
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_step_rule_type, container, false);
-        return v;
+        return inflater.inflate(R.layout.fragment_step_rule_type, container, false);
     }
 
     @Override
@@ -159,5 +173,13 @@ public class StepRuleTypeFragment extends Fragment implements Step {
 
     public interface OnTypeSelectedListener{
         void onTypeSelected(EnumTypeCondition type);
+    }
+
+    private int getIndexOf(EnumTypeCondition type){
+        for (int i = array.size() - 1; i >= 0; i--) {
+            if(array.get(i).type.equals(type))
+                return i;
+        }
+        return -1;
     }
 }

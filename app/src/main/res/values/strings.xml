@@ -48,11 +48,11 @@
     <string name="prefix_condition_big_flush_starts_with">Grande suite commençant par un %1$d</string>
     <string name="prefix_condition_any_double">Double</string>
     <string name="prefix_condition_double">Double %1$d</string>
-    <string name="prefix_condition_any_double_double">Double double</string>
+    <string name="prefix_condition_any_double_double">Double et double</string>
     <string name="prefix_condition_double_double">Double %1$d et double %2$d</string>
     <string name="action_add_rule">Ajouter une règle</string>
     <string name="prefix_condition_double_and_any">Double %1$d et un autre double</string>
-    <string name="confirm_create_new_rule">Confirmer</string>
+    <string name="confirm_create_new_rule">Oui !</string>
     <string name="cancel">Annuler</string>
     <string name="add_rule_title">Ajouter une règle</string>
     <string name="rule_title">Titre de la règle</string>
@@ -78,4 +78,7 @@
     <string name="step_rule_outcome_header">Action à réaliser</string>
     <string name="step_rule_outcome_details">Décrivez l\'action qui doit être réalisée si la condition est satisfaite.</string>
     <string name="rule_outcome">Action</string>
+    <string name="placeholder_text_rules">Cliquez sur le \"+\" pour ajouter une règle !</string>
+    <string name="generate_other">Une autre</string>
+    <string name="generate_rule_title">Règle aléatoire</string>
 </resources>

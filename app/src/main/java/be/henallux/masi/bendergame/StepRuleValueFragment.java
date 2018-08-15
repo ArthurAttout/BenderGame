@@ -2,6 +2,7 @@ package be.henallux.masi.bendergame;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,12 +20,14 @@ import com.stepstone.stepper.Step;
 import com.stepstone.stepper.VerificationError;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import be.henallux.masi.bendergame.model.EnumTypeCondition;
 import be.henallux.masi.bendergame.model.conditions.Condition;
 import be.henallux.masi.bendergame.model.conditions.ConditionBigFlush;
 import be.henallux.masi.bendergame.model.conditions.ConditionContains;
 import be.henallux.masi.bendergame.model.conditions.ConditionDouble;
+import be.henallux.masi.bendergame.model.conditions.ConditionDoubleDouble;
 import be.henallux.masi.bendergame.model.conditions.ConditionQuadruple;
 import be.henallux.masi.bendergame.model.conditions.ConditionSmallFlush;
 import be.henallux.masi.bendergame.model.conditions.ConditionSumEqual;
@@ -89,27 +92,59 @@ public class StepRuleValueFragment extends Fragment implements Step {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
+        viewModel.chosenType.observe(this, this::onTypeSelected);
+        viewModel.chosenValues.observe(this,values ->{
+            ArrayList<Spinner> spinners = new ArrayList<Spinner>() {{
+                add(spinnerValue1);
+                add(spinnerValue2);
+                add(spinnerValue3);
+                add(spinnerValue4);
+            }};
+            for (int i = 0; i < values.size(); i++) {
+                spinners.get(i).setSelection(getIndexOf(spinners.get(i),values.get(i)));
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_step_rule_value, container, false);
         ButterKnife.bind(this,v);
 
-        listener = new SpinnerListener(getString(R.string.default_dice_value));
         showSpinner(1,true);
+        listener = new SpinnerListener(getString(R.string.default_dice_value));
 
         spinnerValue1.setOnItemSelectedListener(listener);
         spinnerValue2.setOnItemSelectedListener(listener);
         spinnerValue3.setOnItemSelectedListener(listener);
         spinnerValue4.setOnItemSelectedListener(listener);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
-        viewModel.chosenType.observe(this, new Observer<EnumTypeCondition>() {
-            @Override
-            public void onChanged(@Nullable EnumTypeCondition enumTypeCondition) {
-                onTypeSelected(enumTypeCondition);
+        //Setup for auto-generated rule
+        if(viewModel.chosenType.getValue() != null){
+            onTypeSelected(viewModel.chosenType.getValue());
+        }
+
+        if(viewModel.chosenValues.getValue() != null){
+            ArrayList<Spinner> spinners = new ArrayList<Spinner>() {{
+                add(spinnerValue1);
+                add(spinnerValue2);
+                add(spinnerValue3);
+                add(spinnerValue4);
+            }};
+            for (int i = 0; i < viewModel.chosenValues.getValue().size(); i++) {
+                spinners.get(i).setSelection(getIndexOf(spinners.get(i), viewModel.chosenValues.getValue().get(i)));
             }
-        });
+        }
 
         return v;
     }
@@ -144,6 +179,7 @@ public class StepRuleValueFragment extends Fragment implements Step {
                 showSpinner(4,true);
                 break;
             case DOUBLE_DOUBLE:
+                showSpinner(2,true);
                 break;
 
         }
@@ -211,7 +247,7 @@ public class StepRuleValueFragment extends Fragment implements Step {
             values.add(String.valueOf(i));
         }
 
-        ArrayAdapter<String> itemsAdapter =  new ArrayAdapter<>(this.getContext(), R.layout.spinner_dropdown_dice_value, values);
+        CustomArrayAdapter<String> itemsAdapter =  new CustomArrayAdapter<>(this.getContext(), R.layout.spinner_dropdown_dice_value, values);
         itemsAdapter.setDropDownViewResource(R.layout.spinner_dropdown_dice_value);
         return itemsAdapter;
     }
@@ -221,21 +257,28 @@ public class StepRuleValueFragment extends Fragment implements Step {
         private EnumTypeCondition typeCondition;
         private String resourceStringDefault;
 
-        public SpinnerListener(String resourceStringDefault) {
+        SpinnerListener(String resourceStringDefault) {
             this.resourceStringDefault = resourceStringDefault;
             typeCondition = EnumTypeCondition.DOUBLE; //First element in previous fragment -> default
             Condition resultingCondition = new ConditionDouble(0);
             textViewRulePreview.setText(resultingCondition.toString(StepRuleValueFragment.this.getContext()));
         }
 
-        public void setTypeCondition(EnumTypeCondition typeCondition) {
+        void setTypeCondition(EnumTypeCondition typeCondition) {
             this.typeCondition = typeCondition;
         }
 
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             Condition resultingCondition = null;
-            int valueInt = getValueInt(parent);
+
+            ArrayList<Integer> values = new ArrayList<Integer>(){{
+                add(getValueInt(spinnerValue1));
+                add(getValueInt(spinnerValue2));
+                add(getValueInt(spinnerValue3));
+                add(getValueInt(spinnerValue4));
+            }};
+            int valueInt = values.get(0);
 
             switch (typeCondition){
 
@@ -249,16 +292,10 @@ public class StepRuleValueFragment extends Fragment implements Step {
                     resultingCondition = new ConditionSumEqualOrGreater(valueInt);
                     break;
                 case CONTAINS:
-                    ArrayList<Integer> values = new ArrayList<Integer>(){{
-                        add(getValueInt(spinnerValue1));
-                        add(getValueInt(spinnerValue2));
-                        add(getValueInt(spinnerValue3));
-                        add(getValueInt(spinnerValue4));
-                    }};
                     resultingCondition = new ConditionContains(values);
                     break;
                 case DOUBLE_DOUBLE:
-                    //TODO
+                    resultingCondition = new ConditionDoubleDouble(values.get(0),values.get(1));
                     break;
                 case DOUBLE:
                     resultingCondition = new ConditionDouble(valueInt);
@@ -276,20 +313,52 @@ public class StepRuleValueFragment extends Fragment implements Step {
                     resultingCondition = new ConditionBigFlush(valueInt);
                     break;
             }
+
             if(resultingCondition != null)
                 textViewRulePreview.setText(resultingCondition.toString(StepRuleValueFragment.this.getContext()));
 
-            viewModel.chosenValue.setValue(valueInt);
+            viewModel.chosenValues.setValue(values);
+            viewModel.currentCondition.setValue(resultingCondition);
         }
 
         private int getValueInt(AdapterView<?> parent) {
             String value = (String)parent.getSelectedItem();
+            if(value == null)
+                return 0;
+
             return value.equals(resourceStringDefault) ? 0 : Integer.valueOf(value);
         }
 
         @Override
         public void onNothingSelected(AdapterView<?> parent) {
 
+        }
+    }
+
+    private int getIndexOf(Spinner spinner, int valueToFind){
+        if(valueToFind == 0)
+            return 0;
+
+        CustomArrayAdapter ad = ((CustomArrayAdapter)spinner.getAdapter());
+        for (int i = 0; i < ad.getObjects().size(); i++) {
+            String s = (String)ad.getObjects().get(i);
+            if(s.equals(Integer.toString(valueToFind)))
+                return i;
+        }
+        return -1;
+    }
+
+    private class CustomArrayAdapter<T> extends ArrayAdapter<T>{
+
+        private List<T> objects;
+
+        CustomArrayAdapter(@NonNull Context context, int resource, @NonNull List<T> objects) {
+            super(context, resource, objects);
+            this.objects = objects;
+        }
+
+        List<T> getObjects() {
+            return objects;
         }
     }
 }

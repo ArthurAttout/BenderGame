@@ -19,6 +19,7 @@ public class Rule implements Parcelable {
     private String title;
 
     public Rule() {
+
     }
 
     public Rule(Condition condition, String outcome, String title) {

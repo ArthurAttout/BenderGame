@@ -17,7 +17,7 @@ import be.henallux.masi.bendergame.utils.Constants;
  * Created by Le Roi Arthur on 30-07-18.
  */
 
-public class ConditionContains implements Condition, Parcelable {
+public class ConditionContains extends Condition implements Parcelable {
 
     private ArrayList<Integer> value;
 
@@ -96,5 +96,16 @@ public class ConditionContains implements Condition, Parcelable {
         map.put(Constants.JSONFields.FIELD_TYPE, EnumTypeCondition.CONTAINS);
         map.put(Constants.JSONFields.FIELD_VALUES, value.toArray());
         return map;
+    }
+
+
+    @Override
+    public EnumTypeCondition getType() {
+        return EnumTypeCondition.CONTAINS;
+    }
+
+    @Override
+    public ArrayList<Integer> getValues() {
+        return value;
     }
 }

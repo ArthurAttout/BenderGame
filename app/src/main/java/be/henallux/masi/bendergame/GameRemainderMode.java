@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -97,6 +98,7 @@ public class GameRemainderMode extends AppCompatActivity {
                 Map opts = (Map)dataSnapshot.getValue();
                 Game currentGame = Game.fromDataSnapshot(opts);
                 gameRemainderViewModel.currentGameLiveData.setValue(currentGame);
+                gameRemainderViewModel.outcome.setValue(""); //Invalidate the current outcome
             }
 
             @Override
@@ -135,6 +137,10 @@ public class GameRemainderMode extends AppCompatActivity {
                         .child("rules")
                         .child(new RandomString(13).nextString())
                         .setValue(rule.getHashMap());
+            }
+
+            if(resultCode == Constants.RESULT_CODE_FAILURE){
+                Toast.makeText(this, "La règle n'a pas pu être ajoutée", Toast.LENGTH_SHORT).show();
             }
         }
     }

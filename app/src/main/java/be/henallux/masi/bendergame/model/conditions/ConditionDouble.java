@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -16,7 +17,7 @@ import be.henallux.masi.bendergame.utils.DuplicateChecker;
  * Created by Le Roi Arthur on 02-08-18.
  */
 
-public class ConditionDouble implements Condition {private int value;
+public class ConditionDouble extends Condition {private int value;
 
     public ConditionDouble(int value) {
         this.value = value;
@@ -75,5 +76,18 @@ public class ConditionDouble implements Condition {private int value;
         map.put(Constants.JSONFields.FIELD_TYPE, EnumTypeCondition.DOUBLE);
         map.put(Constants.JSONFields.FIELD_VALUE, value);
         return map;
+    }
+
+
+    @Override
+    public EnumTypeCondition getType() {
+        return EnumTypeCondition.DOUBLE;
+    }
+
+    @Override
+    public ArrayList<Integer> getValues() {
+        return new ArrayList<Integer>(){{
+            add(value);
+        }};
     }
 }

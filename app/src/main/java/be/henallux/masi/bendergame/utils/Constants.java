@@ -12,6 +12,7 @@ public class Constants {
     public static final String CURRENT_STEP_POSITION_KEY = "current_step_position_key";
     public static final int REQUEST_CODE_CREATE_RULE = 0x87;
     public static final String EXTRA_RULE_KEY = "extra_rule_key";
+    public static final int RESULT_CODE_FAILURE = 0x4aa;
 
     public class JSONFields{
         public static final String FIELD_CONDITION = "condition";

@@ -3,6 +3,7 @@ package be.henallux.masi.bendergame;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -26,8 +27,6 @@ public class StepRuleOutcomeFragment extends Fragment implements Step {
         if(editTextRuleOutcome.getText().toString().equals("")){
             return new VerificationError(getString(R.string.error_mandatory_field));
         }
-
-        viewModel.newRule.getValue().setOutcome(editTextRuleOutcome.getText().toString());
         return null;
     }
 
@@ -60,8 +59,13 @@ public class StepRuleOutcomeFragment extends Fragment implements Step {
         textInputRuleOutcome = v.findViewById(R.id.textInputLayoutOutcome);
         editTextRuleOutcome = v.findViewById(R.id.editTextRuleOutcome);
 
-        viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
-
         return v;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
+        viewModel.chosenOutcome.observe(this, str -> editTextRuleOutcome.setText(str));
     }
 }

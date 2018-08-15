@@ -20,7 +20,7 @@ import be.henallux.masi.bendergame.utils.Constants;
  * Created by Le Roi Arthur on 01-08-18.
  */
 
-public class ConditionBigFlush implements Condition {
+public class ConditionBigFlush extends Condition {
     private int value;
 
     public ConditionBigFlush(int value) {
@@ -111,5 +111,17 @@ public class ConditionBigFlush implements Condition {
         map.put(Constants.JSONFields.FIELD_TYPE, EnumTypeCondition.BIG_FLUSH);
         map.put(Constants.JSONFields.FIELD_VALUE, value);
         return map;
+    }
+
+    @Override
+    public EnumTypeCondition getType() {
+        return EnumTypeCondition.BIG_FLUSH;
+    }
+
+    @Override
+    public ArrayList<Integer> getValues() {
+        return new ArrayList<Integer>(){{
+            add(value);
+        }};
     }
 }

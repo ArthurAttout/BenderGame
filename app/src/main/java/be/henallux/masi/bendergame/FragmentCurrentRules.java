@@ -72,24 +72,33 @@ public class FragmentCurrentRules extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_current_rules, container, false);
         ButterKnife.bind(this,v);
         return v;
     }
 
-    public class RulesAdapter extends RecyclerView.Adapter<RuleViewHolder> {
+    public class RulesAdapter extends RecyclerView.Adapter<ItemViewHolder> {
 
-        public ArrayList<Rule> rules = new ArrayList<>();
-        private RuleViewHolder viewHolder;
+        private static final int VIEW_TYPE_NO_ITEMS = 0x78;
+        private static final int VIEW_TYPE_ITEM = 0x4a8;
+        private ArrayList<Rule> rules = new ArrayList<>();
+        private ItemViewHolder viewHolder;
 
-        public RulesAdapter(ArrayList<Rule> arrayList) {
+        RulesAdapter(ArrayList<Rule> arrayList) {
             rules = arrayList;
         }
 
+        @NonNull
         @Override
-        public RuleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            if(viewType == VIEW_TYPE_NO_ITEMS){ //Placeholder
+                ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.placeholder_item_rule_layout, parent, false);
+                viewHolder = new PlaceholderViewHolder(v);
+                return viewHolder;
+            }
             ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_rule_layout, parent, false);
             viewHolder = new RuleViewHolder(v);
@@ -107,31 +116,55 @@ public class FragmentCurrentRules extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull final RuleViewHolder holder, int position) {
-            final Rule rule = rules.get(position);
-            holder.textViewTitle.setText(rule.getTitle());
-            holder.textViewCondition.setText(rule.getCondition().toString(FragmentCurrentRules.this.getContext()));
-            holder.textViewOutcome.setText(rule.getOutcome());
+        public void onBindViewHolder(@NonNull final ItemViewHolder holder, int position) {
+            if(holder instanceof RuleViewHolder){
+                RuleViewHolder holderTemp = (RuleViewHolder)holder;
+                final Rule rule = rules.get(position);
+                holderTemp.textViewTitle.setText(rule.getTitle());
+                holderTemp.textViewCondition.setText(rule.getCondition().toString(FragmentCurrentRules.this.getContext()));
+                holderTemp.textViewOutcome.setText(rule.getOutcome());
+            }
         }
 
         @Override
         public int getItemCount() {
-            return rules.size();
+            return rules.size() == 0 ? 1 : rules.size();
         }
+
+        @Override
+        public int getItemViewType(int position) {
+            if(rules.size() == 0) return VIEW_TYPE_NO_ITEMS;
+            return VIEW_TYPE_ITEM;
+        }
+
     }
 
-    private class RuleViewHolder extends RecyclerView.ViewHolder{
+    private class RuleViewHolder extends ItemViewHolder{
 
         public TextView textViewTitle;
         public TextView textViewCondition;
         public TextView textViewOutcome;
 
-        public RuleViewHolder(View itemView) {
+        RuleViewHolder(View itemView) {
 
             super(itemView);
-            textViewTitle = (TextView) itemView.findViewById(R.id.textViewRuleTitle);
-            textViewCondition = (TextView) itemView.findViewById(R.id.textViewRuleCondition);
-            textViewOutcome = (TextView) itemView.findViewById(R.id.textViewRuleOutcome);
+            textViewTitle = itemView.findViewById(R.id.textViewRuleTitle);
+            textViewCondition = itemView.findViewById(R.id.textViewRuleCondition);
+            textViewOutcome = itemView.findViewById(R.id.textViewRuleOutcome);
+        }
+    }
+
+    private class PlaceholderViewHolder extends ItemViewHolder{
+
+        PlaceholderViewHolder(View itemView){
+            super(itemView);
+        }
+    }
+
+    private abstract class ItemViewHolder extends RecyclerView.ViewHolder{
+
+        ItemViewHolder(View itemView) {
+            super(itemView);
         }
     }
 

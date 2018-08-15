@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -15,7 +16,7 @@ import be.henallux.masi.bendergame.utils.Constants;
  * Created by Le Roi Arthur on 30-07-18.
  */
 
-public class ConditionSumEqualOrGreater implements Condition, Parcelable {
+public class ConditionSumEqualOrGreater extends Condition implements Parcelable {
 
     private int sumCondition;
 
@@ -69,5 +70,18 @@ public class ConditionSumEqualOrGreater implements Condition, Parcelable {
         map.put(Constants.JSONFields.FIELD_TYPE, EnumTypeCondition.SUM_EQUAL_OR_GREATER);
         map.put(Constants.JSONFields.FIELD_VALUE, sumCondition);
         return map;
+    }
+
+
+    @Override
+    public EnumTypeCondition getType() {
+        return EnumTypeCondition.SUM_EQUAL_OR_GREATER;
+    }
+
+    @Override
+    public ArrayList<Integer> getValues() {
+        return new ArrayList<Integer>(){{
+            add(sumCondition);
+        }};
     }
 }
