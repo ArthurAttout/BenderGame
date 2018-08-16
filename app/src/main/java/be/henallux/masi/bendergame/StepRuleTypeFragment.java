@@ -25,7 +25,6 @@ import be.henallux.masi.bendergame.viewmodel.CreateRuleViewModel;
 
 public class StepRuleTypeFragment extends Fragment implements Step {
 
-    private OnTypeSelectedListener listener;
     private Spinner ruleTypeSpinner;
     private CreateRuleViewModel viewModel;
     private ArrayList<EnumTypeConditionBinder> array;
@@ -80,18 +79,6 @@ public class StepRuleTypeFragment extends Fragment implements Step {
         }};
         ArrayAdapter spinnerArrayAdapter = new ArrayAdapter(this.getActivity(),R.layout.spinner_dropdown_rule_type, array);
         ruleTypeSpinner.setAdapter(spinnerArrayAdapter);
-        ruleTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (listener != null) {
-                    EnumTypeConditionBinder selectedItem = (EnumTypeConditionBinder) ruleTypeSpinner.getSelectedItem();
-                    listener.onTypeSelected(selectedItem.getType());
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
 
         if(viewModel.chosenType.getValue() != null){
             ruleTypeSpinner.setSelection(getIndexOf(viewModel.chosenType.getValue()));
@@ -112,20 +99,6 @@ public class StepRuleTypeFragment extends Fragment implements Step {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_step_rule_type, container, false);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnTypeSelectedListener) {
-            listener = (OnTypeSelectedListener) context;
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        listener = null;
     }
 
     public class EnumTypeConditionBinder{

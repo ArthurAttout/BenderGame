@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,9 +41,11 @@ public class StepRuleNameFragment extends Fragment implements Step {
 
     @Override
     public VerificationError verifyStep() {
-        if(viewModel.chosenName.getValue().equals("")){
+        if(TextUtils.isEmpty(editTextRuleTitle.getText())){
             return new VerificationError(getString(R.string.error_mandatory_field));
         }
+
+        viewModel.chosenName.setValue(editTextRuleTitle.getText().toString());
 
         return null;
     }

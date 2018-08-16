@@ -27,6 +27,7 @@ public class StepRuleOutcomeFragment extends Fragment implements Step {
         if(editTextRuleOutcome.getText().toString().equals("")){
             return new VerificationError(getString(R.string.error_mandatory_field));
         }
+        viewModel.chosenOutcome.setValue(editTextRuleOutcome.getText().toString());
         return null;
     }
 

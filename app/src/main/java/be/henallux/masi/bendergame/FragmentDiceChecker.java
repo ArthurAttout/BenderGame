@@ -62,11 +62,11 @@ public class FragmentDiceChecker extends Fragment {
         super.onCreate(savedInstanceState);
 
         gameRemainderViewModel = ViewModelProviders.of(getActivity()).get(GameRemainderViewModel.class);
-        gameRemainderViewModel.outcome.observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String newOutcome) {
-                textViewOutcome.setText(newOutcome);
-            }
+        gameRemainderViewModel.outcome.observe(this, newOutcome -> textViewOutcome.setText(newOutcome));
+
+        gameRemainderViewModel.currentGameLiveData.observe(this,game ->{
+            //Force actualisation of current outcome
+            computeOutcome(null,0);
         });
     }
 
@@ -98,17 +98,7 @@ public class FragmentDiceChecker extends Fragment {
         AdapterView.OnItemSelectedListener lst = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                hashMapViewInteger.put(parent.getId(),position+1);
-                if(hashMapViewInteger.size() == 4){
-
-                    String outcome = "";
-                    for (Rule rule : gameRemainderViewModel.currentGameLiveData.getValue().getRules()) {
-                        if(rule.getCondition().isSatisfied(hashMapViewInteger.values())){
-                            outcome += rule.getOutcome() + "\n";
-                        }
-                    }
-                    gameRemainderViewModel.outcome.setValue(outcome.equals("") ? "Rien." : outcome);
-                }
+                computeOutcome(parent, position);
             }
 
             @Override
@@ -120,16 +110,29 @@ public class FragmentDiceChecker extends Fragment {
         spinner3.setOnItemSelectedListener(lst);
         spinner4.setOnItemSelectedListener(lst);
 
-        imageButtonHelp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(FragmentDiceChecker.this.getContext());
-                builder.setMessage(R.string.dice_checker_help_dialog)
-                        .setTitle(R.string.dice_checker_help_title);
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
+        imageButtonHelp.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(FragmentDiceChecker.this.getContext());
+            builder.setMessage(R.string.dice_checker_help_dialog)
+                    .setTitle(R.string.dice_checker_help_title);
+            AlertDialog dialog = builder.create();
+            dialog.show();
         });
+    }
+
+    private void computeOutcome(AdapterView<?> parent, int position) {
+        if(parent != null)
+            hashMapViewInteger.put(parent.getId(),position+1);
+
+        if(hashMapViewInteger.size() == 4){
+
+            String outcome = "";
+            for (Rule rule : gameRemainderViewModel.currentGameLiveData.getValue().getRules()) {
+                if(rule.getCondition().isSatisfied(hashMapViewInteger.values())){
+                    outcome += rule.getOutcome() + "\n";
+                }
+            }
+            gameRemainderViewModel.outcome.setValue(outcome.equals("") ? "Rien." : outcome);
+        }
     }
 
     private SpinnerAdapter getSpinnerAdapter(ArrayList<String> values) {

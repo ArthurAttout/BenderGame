@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,17 +97,19 @@ public class StepRuleValueFragment extends Fragment implements Step {
         super.onCreate(savedInstanceState);
         viewModel = ViewModelProviders.of(getActivity()).get(CreateRuleViewModel.class);
         viewModel.chosenType.observe(this, this::onTypeSelected);
-        viewModel.chosenValues.observe(this,values ->{
-            ArrayList<Spinner> spinners = new ArrayList<Spinner>() {{
-                add(spinnerValue1);
-                add(spinnerValue2);
-                add(spinnerValue3);
-                add(spinnerValue4);
-            }};
-            for (int i = 0; i < values.size(); i++) {
-                spinners.get(i).setSelection(getIndexOf(spinners.get(i),values.get(i)));
-            }
-        });
+        viewModel.chosenValues.observe(this,this::setSpinnerValues);
+    }
+
+    private void setSpinnerValues(ArrayList<Integer> values){
+        ArrayList<Spinner> spinners = new ArrayList<Spinner>() {{
+            add(spinnerValue1);
+            add(spinnerValue2);
+            add(spinnerValue3);
+            add(spinnerValue4);
+        }};
+        for (int i = 0; i < values.size(); i++) {
+            spinners.get(i).setSelection(getIndexOf(spinners.get(i),values.get(i)));
+        }
     }
 
     @Override
@@ -181,8 +184,9 @@ public class StepRuleValueFragment extends Fragment implements Step {
             case DOUBLE_DOUBLE:
                 showSpinner(2,true);
                 break;
-
         }
+
+        setSpinnerValues(viewModel.chosenValues.getValue());
     }
 
     private void showSpinner(int value, boolean hasDefaultOption, int min, int max){
