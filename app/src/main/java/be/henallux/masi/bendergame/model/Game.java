@@ -5,21 +5,9 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import be.henallux.masi.bendergame.model.conditions.Condition;
-import be.henallux.masi.bendergame.model.conditions.ConditionBigFlush;
-import be.henallux.masi.bendergame.model.conditions.ConditionContains;
-import be.henallux.masi.bendergame.model.conditions.ConditionDouble;
-import be.henallux.masi.bendergame.model.conditions.ConditionDoubleDouble;
-import be.henallux.masi.bendergame.model.conditions.ConditionQuadruple;
-import be.henallux.masi.bendergame.model.conditions.ConditionSmallFlush;
-import be.henallux.masi.bendergame.model.conditions.ConditionSumEqual;
-import be.henallux.masi.bendergame.model.conditions.ConditionSumEqualOrBelow;
-import be.henallux.masi.bendergame.model.conditions.ConditionSumEqualOrGreater;
-import be.henallux.masi.bendergame.model.conditions.ConditionTriple;
-import be.henallux.masi.bendergame.utils.EnumMode;
 
 /**
  * Created by Le Roi Arthur on 30-07-18.

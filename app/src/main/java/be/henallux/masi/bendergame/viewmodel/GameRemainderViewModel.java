@@ -20,7 +20,7 @@ public class GameRemainderViewModel extends ViewModel {
 
     public GameRemainderViewModel(){
         currentGameLiveData.setValue(new Game());
-        dices.setValue(new ArrayList<Integer>());
+        dices.setValue(new ArrayList<>());
         outcome.setValue("");
     }
 }

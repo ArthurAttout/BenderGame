@@ -98,7 +98,6 @@ public class GameRemainderMode extends AppCompatActivity {
                 Map opts = (Map)dataSnapshot.getValue();
                 Game currentGame = Game.fromDataSnapshot(opts);
                 gameRemainderViewModel.currentGameLiveData.setValue(currentGame);
-                gameRemainderViewModel.outcome.setValue(""); //Invalidate the current outcome
             }
 
             @Override

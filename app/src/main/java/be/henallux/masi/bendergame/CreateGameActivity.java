@@ -1,5 +1,6 @@
 package be.henallux.masi.bendergame;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,12 +20,19 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
+import be.henallux.masi.bendergame.model.EnumTypeCondition;
 import be.henallux.masi.bendergame.model.Game;
-import be.henallux.masi.bendergame.utils.EnumMode;
+import be.henallux.masi.bendergame.model.EnumMode;
+import be.henallux.masi.bendergame.model.Mode;
+import be.henallux.masi.bendergame.utils.Constants;
 import be.henallux.masi.bendergame.utils.RandomString;
+import be.henallux.masi.bendergame.viewmodel.CreateGameViewModel;
+import be.henallux.masi.bendergame.viewmodel.GameRemainderViewModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -56,6 +64,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
     private final DatabaseReference firebaseDatabase = FirebaseDatabase.getInstance().getReference();
     private final RandomString gen = new RandomString(7);
+    private CreateGameViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,59 +73,99 @@ public class CreateGameActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        viewModel = ViewModelProviders.of(this).get(CreateGameViewModel.class);
+
+        firebaseDatabase.child("modes").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                buttonCreateGame.setEnabled(group.getCheckedRadioButtonId() != -1);
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                HashMap<String,Object> modesRaw = (HashMap<String,Object>)dataSnapshot.getValue();
+                HashMap<String,Mode> modes = new HashMap<>();
+
+                for (Map.Entry<String, Object> entry : modesRaw.entrySet()) {
+                    Map modeMap = (Map)entry.getValue();
+                    boolean isAvailable = (boolean) modeMap.get(Constants.JSONFields.FIELD_MODE_AVAILABLE);
+                    EnumMode type = EnumMode.valueOf((String)modeMap.get(Constants.JSONFields.FIELD_MODE_NAME));
+                    modes.put(entry.getKey(),new Mode(type,isAvailable));
+                }
+
+
+                radioButtonRemainder.setEnabled(false);
+                radioButtonNoRealDice.setEnabled(false);
+                radioButtonOnePhone.setEnabled(false);
+
+                Iterator<Map.Entry<String, Mode>> iterator = modes.entrySet().iterator();
+                while(iterator.hasNext()){
+                    Mode mode = iterator.next().getValue();
+
+                    if(!mode.isAvailable()){
+                        iterator.remove();
+                    }
+                    else
+                    {
+                        switch (mode.getType()){
+                            case MODE_REMAINDER:
+                                radioButtonRemainder.setEnabled(true);
+                                break;
+
+                            case MODE_NO_REAL_DICES:
+                                radioButtonNoRealDice.setEnabled(true);
+                                break;
+
+                            case MODE_ONLY_ONE_PHONE:
+                                radioButtonOnePhone.setEnabled(true);
+                                break;
+                        }
+                    }
+                }
             }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
 
-        buttonHelp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(CreateGameActivity.this);
-                builder.setMessage(R.string.dialog_message)
-                        .setTitle(R.string.dialog_title);
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> buttonCreateGame.setEnabled(group.getCheckedRadioButtonId() != -1));
+
+        buttonHelp.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(CreateGameActivity.this);
+            builder.setMessage(R.string.dialog_message)
+                    .setTitle(R.string.dialog_title);
+            AlertDialog dialog = builder.create();
+            dialog.show();
         });
 
-        buttonCreateGame.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EnumMode mode = getEnumMode();
-                if(mode != EnumMode.MODE_ONLY_ONE_PHONE){
-                    progressBar.setVisibility(View.VISIBLE);
-                    buttonCreateGame.setEnabled(false);
-                    firebaseDatabase.child("games").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            GenericTypeIndicator<HashMap<String,Game>> t = new GenericTypeIndicator<HashMap<String,Game>>(){};
-                            HashMap<String,Game> games = dataSnapshot.getValue(t);
+        buttonCreateGame.setOnClickListener(v -> {
+            EnumMode mode = getEnumMode();
+            if(mode != EnumMode.MODE_ONLY_ONE_PHONE){
+                progressBar.setVisibility(View.VISIBLE);
+                buttonCreateGame.setEnabled(false);
+                firebaseDatabase.child("games").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        GenericTypeIndicator<HashMap<String,Game>> t = new GenericTypeIndicator<HashMap<String,Game>>(){};
+                        HashMap<String,Game> games = dataSnapshot.getValue(t);
 
-                            String newKey = getIDForNewGame(games);
-                            progressBar.setVisibility(View.GONE);
-                            textViewGameID.setVisibility(View.VISIBLE);
-                            textViewGameID.setText(getString(R.string.prefix_generated_id, newKey));
+                        String newKey = getIDForNewGame(games);
+                        progressBar.setVisibility(View.GONE);
+                        textViewGameID.setVisibility(View.VISIBLE);
+                        textViewGameID.setText(getString(R.string.prefix_generated_id, newKey));
 
-                            DatabaseReference gamesRef = firebaseDatabase.child("games");
-                            Map<String,String> newGameMap = new HashMap<>();
-                            newGameMap.put("id",newKey);
+                        DatabaseReference gamesRef = firebaseDatabase.child("games");
+                        Map<String,String> newGameMap = new HashMap<>();
+                        newGameMap.put("id",newKey);
 
-                            gamesRef.child(newKey).setValue(newGameMap);
-                        }
+                        gamesRef.child(newKey).setValue(newGameMap);
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                        }
-                    });
-                }
-                else
-                {
-                    throw new UnsupportedOperationException();
-                }
+                    }
+                });
+            }
+            else
+            {
+                throw new UnsupportedOperationException();
             }
         });
     }

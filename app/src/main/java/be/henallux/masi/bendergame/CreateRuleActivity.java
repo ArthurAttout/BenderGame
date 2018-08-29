@@ -89,11 +89,14 @@ public class CreateRuleActivity extends AppCompatActivity implements Validator.V
 
     @Override
     public void onCompleted(View completeButton) {
-        
-        Condition resultingCondition = viewModel.currentCondition.getValue();
-        Rule newRule = viewModel.getRule();
 
-        if(resultingCondition == null || newRule == null){
+        Rule newRule = new Rule(
+                viewModel.currentCondition.getValue(),
+                viewModel.chosenOutcome.getValue(),
+                viewModel.chosenName.getValue()
+        );
+
+        if(newRule.getCondition() == null){
             //Fail gracefully
             Intent returnIntent = new Intent();
             setResult(Constants.RESULT_CODE_FAILURE,returnIntent);
@@ -101,9 +104,8 @@ public class CreateRuleActivity extends AppCompatActivity implements Validator.V
         }
         else
         {
-            Rule resultingRule = new Rule(resultingCondition,newRule.getOutcome(),newRule.getTitle());
             Intent returnIntent = new Intent();
-            returnIntent.putExtra(Constants.EXTRA_RULE_KEY,resultingRule);
+            returnIntent.putExtra(Constants.EXTRA_RULE_KEY,newRule);
             setResult(Activity.RESULT_OK,returnIntent);
             finish();
         }

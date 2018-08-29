@@ -88,9 +88,4 @@ public class CreateRuleViewModel extends ViewModel {
         chosenValues.setValue(generatedRule.getValue().getCondition().getValues());
         currentCondition.setValue(generatedRule.getValue().getCondition());
     }
-
-    public Rule getRule() {
-        Condition c = null;
-        return new Rule(c,chosenName.getValue(),chosenOutcome.getValue());
-    }
 }

@@ -21,5 +21,7 @@ public class Constants {
         public static final String FIELD_VALUE = "value";
         public static final String FIELD_TYPE = "type";
         public static final String FIELD_VALUES = "values";
+        public static final String FIELD_MODE_NAME = "name";
+        public static final String FIELD_MODE_AVAILABLE = "available";
     }
 }

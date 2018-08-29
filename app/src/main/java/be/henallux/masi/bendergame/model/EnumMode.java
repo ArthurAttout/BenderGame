@@ -1,4 +1,4 @@
-package be.henallux.masi.bendergame.utils;
+package be.henallux.masi.bendergame.model;
 
 /**
  * Created by Le Roi Arthur on 30-07-18.
