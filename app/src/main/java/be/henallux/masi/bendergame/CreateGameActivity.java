@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -125,6 +126,18 @@ public class CreateGameActivity extends AppCompatActivity {
         });
 
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> buttonCreateGame.setEnabled(group.getCheckedRadioButtonId() != -1));
+        radioButtonNoRealDice.setOnCheckedChangeListener((parent,checked) -> {
+            if(checked)
+                viewModel.chosenMode.postValue(EnumMode.MODE_NO_REAL_DICES);
+        });
+        radioButtonOnePhone.setOnCheckedChangeListener((parent,checked) -> {
+            if(checked)
+                viewModel.chosenMode.postValue(EnumMode.MODE_ONLY_ONE_PHONE);
+        });
+        radioButtonRemainder.setOnCheckedChangeListener((parent,checked) -> {
+            if(checked)
+                viewModel.chosenMode.postValue(EnumMode.MODE_REMAINDER);
+        });
 
         buttonHelp.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(CreateGameActivity.this);
@@ -135,15 +148,18 @@ public class CreateGameActivity extends AppCompatActivity {
         });
 
         buttonCreateGame.setOnClickListener(v -> {
-            EnumMode mode = getEnumMode();
+            if(viewModel.chosenMode.getValue() == null)
+                return;
+
+            EnumMode mode = viewModel.chosenMode.getValue();
+
             if(mode != EnumMode.MODE_ONLY_ONE_PHONE){
                 progressBar.setVisibility(View.VISIBLE);
                 buttonCreateGame.setEnabled(false);
                 firebaseDatabase.child("games").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        GenericTypeIndicator<HashMap<String,Game>> t = new GenericTypeIndicator<HashMap<String,Game>>(){};
-                        HashMap<String,Game> games = dataSnapshot.getValue(t);
+                        Map<String,Object> games = (Map<String,Object>)dataSnapshot.getValue();
 
                         String newKey = getIDForNewGame(games);
                         progressBar.setVisibility(View.GONE);
@@ -151,8 +167,10 @@ public class CreateGameActivity extends AppCompatActivity {
                         textViewGameID.setText(getString(R.string.prefix_generated_id, newKey));
 
                         DatabaseReference gamesRef = firebaseDatabase.child("games");
-                        Map<String,String> newGameMap = new HashMap<>();
-                        newGameMap.put("id",newKey);
+                        Map<String,Object> newGameMap = new HashMap<>();
+                        newGameMap.put(Constants.JSONFields.FIELD_GAME_ID,newKey);
+                        newGameMap.put(Constants.JSONFields.FIELD_GAME_MODE,mode.name());
+                        newGameMap.put(Constants.JSONFields.FIELD_GAME_RULES,viewModel.getDefaultRules(CreateGameActivity.this));
 
                         gamesRef.child(newKey).setValue(newGameMap);
                     }
@@ -170,8 +188,8 @@ public class CreateGameActivity extends AppCompatActivity {
         });
     }
 
-    private String getIDForNewGame(HashMap<String, Game> games) {
-        String ID = null;
+    private String getIDForNewGame(Map<String, Object> games) {
+        String ID;
         do{
             ID = gen.nextString();
         } while(games.containsKey(ID));
@@ -179,19 +197,5 @@ public class CreateGameActivity extends AppCompatActivity {
 
     }
 
-    private EnumMode getEnumMode() {
-        if(radioButtonNoRealDice.isChecked()){
-            return EnumMode.MODE_NO_REAL_DICES;
-        }
-        else
-        {
-            if(radioButtonOnePhone.isChecked()){
-                return EnumMode.MODE_ONLY_ONE_PHONE;
-            }
-            else
-            {
-                return EnumMode.MODE_REMAINDER;
-            }
-        }
-    }
+
 }

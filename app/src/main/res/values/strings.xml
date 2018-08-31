@@ -81,4 +81,14 @@
     <string name="placeholder_text_rules">Cliquez sur le \"+\" pour ajouter une règle !</string>
     <string name="generate_other">Une autre</string>
     <string name="generate_rule_title">Règle aléatoire</string>
+
+    <string name="default_rule_invent_rule">Le lanceur invente une règle</string>
+    <string name="default_rule_cancel_rule">Le lanceur invente ou annule une règle</string>
+    <string name="default_rule_all_drink">Tout le monde affone sauf le lanceur</string>
+    <string name="default_rule_thrower_drinks">Le lanceur affone</string>
+
+    <string name="default_rule_invent_rule_title">Invention d\'une règle</string>
+    <string name="default_rule_cancel_rule_title">Invention ou annulation d\'une règle</string>
+    <string name="default_rule_all_drink_title">Plus de 21</string>
+    <string name="default_rule_thrower_drinks_title">Moins de 8</string>
 </resources>

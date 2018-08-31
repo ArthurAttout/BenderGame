@@ -23,5 +23,8 @@ public class Constants {
         public static final String FIELD_VALUES = "values";
         public static final String FIELD_MODE_NAME = "name";
         public static final String FIELD_MODE_AVAILABLE = "available";
+        public static final String FIELD_GAME_ID = "id";
+        public static final String FIELD_GAME_MODE = "mode";
+        public static final String FIELD_GAME_RULES = "rules";
     }
 }
