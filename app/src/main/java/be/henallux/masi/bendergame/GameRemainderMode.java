@@ -91,8 +91,7 @@ public class GameRemainderMode extends AppCompatActivity {
         });
 
 
-
-        firebaseDatabase.child("games").child(gameRemainderViewModel.currentGameLiveData.getValue().getID()).addValueEventListener(new ValueEventListener() {
+        firebaseDatabase.child(Constants.JSONFields.FIELD_ROOT_GAME).child(gameRemainderViewModel.currentGameLiveData.getValue().getID()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Map opts = (Map)dataSnapshot.getValue();
@@ -121,8 +120,21 @@ public class GameRemainderMode extends AppCompatActivity {
                 Intent i = new Intent(this, CreateRuleActivity.class);
                 i.putExtra(Constants.EXTRA_GAME_KEY,gameRemainderViewModel.currentGameLiveData.getValue());
                 startActivityForResult(i,Constants.REQUEST_CODE_CREATE_RULE);
+                break;
+
+            case R.id.action_delete_rule:
+                gameRemainderViewModel.showDeleteIcon.setValue(true);
+
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(gameRemainderViewModel.showDeleteIcon.getValue() != null && gameRemainderViewModel.showDeleteIcon.getValue()){
+            //Dismiss delete mode
+            gameRemainderViewModel.showDeleteIcon.setValue(false);
+        }
     }
 
     @Override
@@ -131,7 +143,7 @@ public class GameRemainderMode extends AppCompatActivity {
             if(resultCode == Activity.RESULT_OK){
                 Rule rule = data.getParcelableExtra(Constants.EXTRA_RULE_KEY);
                 firebaseDatabase
-                        .child("games")
+                        .child(Constants.JSONFields.FIELD_ROOT_GAME)
                         .child(gameRemainderViewModel.currentGameLiveData.getValue().getID())
                         .child("rules")
                         .child(new RandomString(13).nextString())

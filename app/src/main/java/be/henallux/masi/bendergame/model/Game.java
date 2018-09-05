@@ -58,7 +58,7 @@ public class Game implements Parcelable {
         switch(mode){
 
             case MODE_REMAINDER:
-                rules = getRulesFromRemainder((HashMap<Long,Map>)opts.get("rules"));
+                rules = getRulesFromRemainder((HashMap<String,Map>)opts.get("rules"));
                 return new Game(gameID,mode,rules);
 
             case MODE_NO_REAL_DICES:
@@ -75,16 +75,16 @@ public class Game implements Parcelable {
         return null;
     }
 
-    private static ArrayList<Rule> getRulesFromRemainder(HashMap<Long,Map> rules) {
+    private static ArrayList<Rule> getRulesFromRemainder(HashMap<String,Map> rules) {
 
         ArrayList<Rule> rulesModel = new ArrayList<>();
         if(rules == null)
             return rulesModel;
 
-        for (Map o : rules.values()) {
-            if(o == null) continue;
-            Condition condition = Condition.fromMap((Map)o.get("condition"));
-            rulesModel.add(new Rule(condition,String.valueOf(o.get("outcome")), String.valueOf(o.get("title"))));
+        for (Map.Entry<String, Map> o : rules.entrySet()) {
+            if(o == null || o.getValue() == null) continue;
+            Condition condition = Condition.fromMap((Map)o.getValue().get("condition"));
+            rulesModel.add(new Rule(o.getKey(),condition,String.valueOf(o.getValue().get("outcome")), String.valueOf(o.getValue().get("title"))));
         }
         return rulesModel;
     }
@@ -94,7 +94,7 @@ public class Game implements Parcelable {
         ID = in.readString();
         mode = (EnumMode) in.readValue(EnumMode.class.getClassLoader());
         if (in.readByte() == 0x01) {
-            rules = new ArrayList<Rule>();
+            rules = new ArrayList<>();
             in.readList(rules, Rule.class.getClassLoader());
         } else {
             rules = null;

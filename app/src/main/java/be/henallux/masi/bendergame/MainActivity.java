@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                     progressBarGameID.setVisibility(View.VISIBLE);
                     final String gameID = editTextGameID.getText().toString();
 
-                    firebaseDatabase.child("games").addListenerForSingleValueEvent(new ValueEventListener() {
+                    firebaseDatabase.child(Constants.JSONFields.FIELD_ROOT_GAME).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             if(!dataSnapshot.hasChild(gameID)){

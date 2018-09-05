@@ -156,7 +156,7 @@ public class CreateGameActivity extends AppCompatActivity {
             if(mode != EnumMode.MODE_ONLY_ONE_PHONE){
                 progressBar.setVisibility(View.VISIBLE);
                 buttonCreateGame.setEnabled(false);
-                firebaseDatabase.child("games").addListenerForSingleValueEvent(new ValueEventListener() {
+                firebaseDatabase.child(Constants.JSONFields.FIELD_ROOT_GAME).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Map<String,Object> games = (Map<String,Object>)dataSnapshot.getValue();
@@ -166,7 +166,7 @@ public class CreateGameActivity extends AppCompatActivity {
                         textViewGameID.setVisibility(View.VISIBLE);
                         textViewGameID.setText(getString(R.string.prefix_generated_id, newKey));
 
-                        DatabaseReference gamesRef = firebaseDatabase.child("games");
+                        DatabaseReference gamesRef = firebaseDatabase.child(Constants.JSONFields.FIELD_ROOT_GAME);
                         Map<String,Object> newGameMap = new HashMap<>();
                         newGameMap.put(Constants.JSONFields.FIELD_GAME_ID,newKey);
                         newGameMap.put(Constants.JSONFields.FIELD_GAME_MODE,mode.name());

@@ -91,7 +91,6 @@
         app:layout_constraintGuide_percent="0.3" />
 
 
-
     <Button
         android:id="@+id/buttonGenerateRule"
         style="@style/Widget.AppCompat.Button.Borderless"

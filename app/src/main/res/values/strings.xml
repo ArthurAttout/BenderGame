@@ -91,4 +91,5 @@
     <string name="default_rule_cancel_rule_title">Invention ou annulation d\'une règle</string>
     <string name="default_rule_all_drink_title">Plus de 21</string>
     <string name="default_rule_thrower_drinks_title">Moins de 8</string>
+    <string name="action_delete_rule">Supprimer une règle</string>
 </resources>

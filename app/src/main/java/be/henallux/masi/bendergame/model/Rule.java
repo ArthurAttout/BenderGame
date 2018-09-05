@@ -17,12 +17,14 @@ public class Rule implements Parcelable {
     private Condition condition;
     private String outcome;
     private String title;
+    private String ID;
 
     public Rule() {
 
     }
 
-    public Rule(Condition condition, String outcome, String title) {
+    public Rule(String ID,Condition condition, String outcome, String title) {
+        this.ID = ID;
         this.condition = condition;
         this.outcome = outcome;
         this.title = title;
@@ -41,6 +43,7 @@ public class Rule implements Parcelable {
     }
 
     protected Rule(Parcel in) {
+        ID = in.readString();
         condition = (Condition) in.readValue(Condition.class.getClassLoader());
         outcome = in.readString();
         title = in.readString();
@@ -58,6 +61,14 @@ public class Rule implements Parcelable {
         this.title = title;
     }
 
+    public String getID() {
+        return ID;
+    }
+
+    public void setID(String ID) {
+        this.ID = ID;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -65,6 +76,7 @@ public class Rule implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(ID);
         dest.writeValue(condition);
         dest.writeString(outcome);
         dest.writeString(title);

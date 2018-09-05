@@ -1,33 +1,28 @@
 package be.henallux.masi.bendergame;
 
-import android.arch.lifecycle.Observer;
+import android.animation.LayoutTransition;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
-import be.henallux.masi.bendergame.model.Game;
 import be.henallux.masi.bendergame.model.Rule;
-import be.henallux.masi.bendergame.utils.Constants;
-import be.henallux.masi.bendergame.utils.OnFragmentInteractionListener;
 import be.henallux.masi.bendergame.viewmodel.GameRemainderViewModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,6 +35,7 @@ public class FragmentCurrentRules extends Fragment {
 
     private RulesAdapter adapter;
     private GameRemainderViewModel gameRemainderViewModel;
+    private final DatabaseReference firebaseDatabase = FirebaseDatabase.getInstance().getReference();
 
     public FragmentCurrentRules() {}
 
@@ -50,15 +46,17 @@ public class FragmentCurrentRules extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         gameRemainderViewModel = ViewModelProviders.of(getActivity()).get(GameRemainderViewModel.class);
-        gameRemainderViewModel.currentGameLiveData.observe(this, new Observer<Game>() {
-            @Override
-            public void onChanged(@Nullable Game game) {
-                if(game != null){
-                    if(adapter != null)
-                        adapter.setRules(game.getRules());
-                }
+        gameRemainderViewModel.currentGameLiveData.observe(this, game -> {
+            if(game != null){
+                if(adapter != null)
+                    adapter.setRules(game.getRules());
             }
+        });
+
+        gameRemainderViewModel.showDeleteIcon.observe(this,showIcon -> {
+            adapter.shouldShowDeleteIconChanged(showIcon);
         });
     }
 
@@ -83,8 +81,9 @@ public class FragmentCurrentRules extends Fragment {
 
         private static final int VIEW_TYPE_NO_ITEMS = 0x78;
         private static final int VIEW_TYPE_ITEM = 0x4a8;
-        private ArrayList<Rule> rules = new ArrayList<>();
+        private ArrayList<Rule> rules;
         private ItemViewHolder viewHolder;
+        private boolean showIconDelete;
 
         RulesAdapter(ArrayList<Rule> arrayList) {
             rules = arrayList;
@@ -101,7 +100,10 @@ public class FragmentCurrentRules extends Fragment {
             }
             ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_rule_layout, parent, false);
-            viewHolder = new RuleViewHolder(v);
+
+            viewHolder = new RuleViewHolder(v, (rule, position) -> {
+                gameRemainderViewModel.deleteRule(rule);
+            });
             return viewHolder;
         }
 
@@ -110,19 +112,11 @@ public class FragmentCurrentRules extends Fragment {
             notifyDataSetChanged();
         }
 
-        public void addRule(Rule rule) {
-            rules.add(rule);
-            notifyItemInserted(rules.size() - 1);
-        }
-
         @Override
         public void onBindViewHolder(@NonNull final ItemViewHolder holder, int position) {
             if(holder instanceof RuleViewHolder){
                 RuleViewHolder holderTemp = (RuleViewHolder)holder;
-                final Rule rule = rules.get(position);
-                holderTemp.textViewTitle.setText(rule.getTitle());
-                holderTemp.textViewCondition.setText(rule.getCondition().toString(FragmentCurrentRules.this.getContext()));
-                holderTemp.textViewOutcome.setText(rule.getOutcome());
+                holderTemp.bind(rules.get(position),showIconDelete);
             }
         }
 
@@ -137,6 +131,14 @@ public class FragmentCurrentRules extends Fragment {
             return VIEW_TYPE_ITEM;
         }
 
+        public void shouldShowDeleteIconChanged(Boolean showIcon) {
+            showIconDelete = showIcon;
+            notifyDataSetChanged();
+        }
+    }
+
+    public interface OnRuleClickedListener {
+        void onItemSelected(Rule rule, int position);
     }
 
     private class RuleViewHolder extends ItemViewHolder{
@@ -144,25 +146,43 @@ public class FragmentCurrentRules extends Fragment {
         public TextView textViewTitle;
         public TextView textViewCondition;
         public TextView textViewOutcome;
+        public ImageButton deleteRuleButton;
+        private Rule rule;
 
-        RuleViewHolder(View itemView) {
+        RuleViewHolder(View itemView, OnRuleClickedListener clicks) {
 
             super(itemView);
+
             textViewTitle = itemView.findViewById(R.id.textViewRuleTitle);
             textViewCondition = itemView.findViewById(R.id.textViewRuleCondition);
             textViewOutcome = itemView.findViewById(R.id.textViewRuleOutcome);
+            deleteRuleButton = itemView.findViewById(R.id.buttonDeleteRule);
+            deleteRuleButton.setOnClickListener((v) -> {
+                int adapterPosition = getAdapterPosition();
+                if(adapterPosition >= 0) {
+                    clicks.onItemSelected(rule, adapterPosition);
+                }
+            });
+            
+            ((ViewGroup)itemView.findViewById(R.id.constraintLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+        }
+
+        public void bind(Rule rule,boolean showIconDelete){
+            this.rule = rule;
+            textViewTitle.setText(rule.getTitle());
+            textViewCondition.setText(rule.getCondition().toString(FragmentCurrentRules.this.getContext()));
+            textViewOutcome.setText(rule.getOutcome());
+            deleteRuleButton.setVisibility(showIconDelete ? View.VISIBLE : View.GONE);
         }
     }
 
     private class PlaceholderViewHolder extends ItemViewHolder{
-
         PlaceholderViewHolder(View itemView){
             super(itemView);
         }
     }
 
     private abstract class ItemViewHolder extends RecyclerView.ViewHolder{
-
         ItemViewHolder(View itemView) {
             super(itemView);
         }

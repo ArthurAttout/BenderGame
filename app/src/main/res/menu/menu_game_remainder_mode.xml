@@ -6,5 +6,10 @@
         android:id="@+id/action_add_rule"
         android:icon="@drawable/baseline_add_white_18"
         android:title="@string/action_add_rule"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_delete_rule"
+        android:title="@string/action_delete_rule"
+        app:showAsAction="never" />
 </menu>

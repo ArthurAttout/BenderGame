@@ -23,19 +23,19 @@ public class CreateGameViewModel extends ViewModel {
 
     public HashMap<String,HashMap> getDefaultRules(Context ctx) {
         return new HashMap<String,HashMap>(){{
-            put("def1",new Rule(
+            put("def1",new Rule("def1",
                     new ConditionTriple(0),
                     ctx.getString(R.string.default_rule_invent_rule),
                     ctx.getString(R.string.default_rule_invent_rule_title)).getHashMap());
-            put("def2",new Rule(
+            put("def2",new Rule("def2",
                     new ConditionQuadruple(0),
                     ctx.getString(R.string.default_rule_cancel_rule),
                     ctx.getString(R.string.default_rule_cancel_rule_title)).getHashMap());
-            put("def3",new Rule(
+            put("def3",new Rule("def3",
                     new ConditionSumEqualOrGreater(21),
                     ctx.getString(R.string.default_rule_all_drink),
                     ctx.getString(R.string.default_rule_all_drink_title)).getHashMap());
-            put("def4",new Rule(
+            put("def4",new Rule("def4",
                     new ConditionSumEqualOrBelow(7),
                     ctx.getString(R.string.default_rule_thrower_drinks),
                     ctx.getString(R.string.default_rule_thrower_drinks_title)).getHashMap());

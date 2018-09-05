@@ -15,6 +15,7 @@ public class Constants {
     public static final int RESULT_CODE_FAILURE = 0x4aa;
 
     public class JSONFields{
+        public static final String FIELD_ROOT_GAME = "games";
         public static final String FIELD_CONDITION = "condition";
         public static final String FIELD_OUTCOME = "outcome";
         public static final String FIELD_TITLE = "title";

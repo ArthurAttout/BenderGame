@@ -44,6 +44,7 @@ import be.henallux.masi.bendergame.model.conditions.ConditionSumEqualOrGreater;
 import be.henallux.masi.bendergame.model.conditions.ConditionTriple;
 import be.henallux.masi.bendergame.utils.Constants;
 import be.henallux.masi.bendergame.utils.OnFragmentInteractionListener;
+import be.henallux.masi.bendergame.utils.RandomString;
 import be.henallux.masi.bendergame.viewmodel.CreateRuleViewModel;
 
 public class CreateRuleActivity extends AppCompatActivity implements Validator.ValidationListener, OnFragmentInteractionListener, StepperLayout.StepperListener{
@@ -90,7 +91,7 @@ public class CreateRuleActivity extends AppCompatActivity implements Validator.V
     @Override
     public void onCompleted(View completeButton) {
 
-        Rule newRule = new Rule(
+        Rule newRule = new Rule(new RandomString(13).nextString(),
                 viewModel.currentCondition.getValue(),
                 viewModel.chosenOutcome.getValue(),
                 viewModel.chosenName.getValue()

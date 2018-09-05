@@ -56,15 +56,14 @@ public class CreateRuleViewModel extends ViewModel {
                 ArrayList<Map.Entry<String,Rule>> test = new ArrayList(rules.entrySet());
                 String keyToFind = test.get(i).getKey();
 
-                Log.i("testGenerate",keyToFind);
-
                 DatabaseReference welcomeScreenMessage = firebaseDatabase.child("rules").child(keyToFind);
                 welcomeScreenMessage.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Map o = (Map) dataSnapshot.getValue();
+
                         Condition condition = Condition.fromMap((Map)o.get("condition"));
-                        generatedRule.setValue(new Rule(condition,String.valueOf(o.get("outcome")), String.valueOf(o.get("title"))));
+                        generatedRule.setValue(new Rule(dataSnapshot.getKey(),condition,String.valueOf(o.get("outcome")), String.valueOf(o.get("title"))));
                     }
 
                     @Override
