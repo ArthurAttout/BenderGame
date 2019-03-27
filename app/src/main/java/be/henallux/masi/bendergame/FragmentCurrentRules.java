@@ -163,8 +163,6 @@ public class FragmentCurrentRules extends Fragment {
                     clicks.onItemSelected(rule, adapterPosition);
                 }
             });
-            
-            ((ViewGroup)itemView.findViewById(R.id.constraintLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
         }
 
         public void bind(Rule rule,boolean showIconDelete){
