@@ -47,15 +47,8 @@ public class GenerateRuleDialog extends android.support.v4.app.DialogFragment {
         });
 
         builder.setView(view)
-            .setPositiveButton(R.string.confirm_create_new_rule, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int id) {
-                    viewModel.validateGeneratedRule();
-                }
-            })
-            .setNegativeButton(R.string.generate_other, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {}
-            });
+            .setPositiveButton(R.string.confirm_create_new_rule, (dialog, id) -> viewModel.validateGeneratedRule())
+            .setNegativeButton(R.string.generate_other, (dialog, id) -> {});
         return builder.create();
     }
 

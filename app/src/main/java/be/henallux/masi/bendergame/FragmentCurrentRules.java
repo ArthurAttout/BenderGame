@@ -1,16 +1,14 @@
 package be.henallux.masi.bendergame;
 
-import android.animation.LayoutTransition;
 import android.arch.lifecycle.ViewModelProviders;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +56,10 @@ public class FragmentCurrentRules extends Fragment {
         gameRemainderViewModel.showDeleteIcon.observe(this,showIcon -> {
             adapter.shouldShowDeleteIconChanged(showIcon);
         });
+
+        gameRemainderViewModel.pendingRuleDelete.observe(this,rule -> {
+            adapter.notifyPendingItemDeleteChanged(rule);
+        });
     }
 
     @Override
@@ -83,6 +85,8 @@ public class FragmentCurrentRules extends Fragment {
         private static final int VIEW_TYPE_ITEM = 0x4a8;
         private ArrayList<Rule> rules;
         private ItemViewHolder viewHolder;
+        private Rule pendingRuleDelete;
+        private int indexPendingRuleDelete;
         private boolean showIconDelete;
 
         RulesAdapter(ArrayList<Rule> arrayList) {
@@ -102,7 +106,17 @@ public class FragmentCurrentRules extends Fragment {
                     .inflate(R.layout.item_rule_layout, parent, false);
 
             viewHolder = new RuleViewHolder(v, (rule, position) -> {
-                gameRemainderViewModel.deleteRule(rule);
+                gameRemainderViewModel.addPendingDeleteRule(rule);
+                Snackbar.make(getView(), R.string.action_rule_deleted, Snackbar.LENGTH_LONG)
+                        .addCallback(new Snackbar.Callback(){
+                            @Override
+                            public void onDismissed(Snackbar transientBottomBar, int event) {
+                                gameRemainderViewModel.executeDeletePending();
+                            }
+                        })
+                        .setAction(getString(R.string.action_undo), v1 -> {
+                            gameRemainderViewModel.undoDeleteRule();
+                        }).show();
             });
             return viewHolder;
         }
@@ -135,6 +149,26 @@ public class FragmentCurrentRules extends Fragment {
             showIconDelete = showIcon;
             notifyDataSetChanged();
         }
+
+        public void notifyPendingItemDeleteChanged(Rule rule) {
+            if(rule != null){
+                // DO
+                indexPendingRuleDelete = rules.indexOf(rule);
+                rules.remove(rule);
+                pendingRuleDelete = rule;
+
+                notifyItemRemoved(indexPendingRuleDelete);
+            }
+            else
+            {
+                // UNDO
+                rules.add(pendingRuleDelete);
+                notifyItemInserted(indexPendingRuleDelete);
+
+                pendingRuleDelete = null;
+                indexPendingRuleDelete = 0;
+            }
+        }
     }
 
     public interface OnRuleClickedListener {
@@ -143,6 +177,7 @@ public class FragmentCurrentRules extends Fragment {
 
     private class RuleViewHolder extends ItemViewHolder{
 
+        public View parentView;
         public TextView textViewTitle;
         public TextView textViewCondition;
         public TextView textViewOutcome;
@@ -153,6 +188,7 @@ public class FragmentCurrentRules extends Fragment {
 
             super(itemView);
 
+            parentView = itemView;
             textViewTitle = itemView.findViewById(R.id.textViewRuleTitle);
             textViewCondition = itemView.findViewById(R.id.textViewRuleCondition);
             textViewOutcome = itemView.findViewById(R.id.textViewRuleOutcome);
@@ -171,6 +207,7 @@ public class FragmentCurrentRules extends Fragment {
             textViewCondition.setText(rule.getCondition().toString(FragmentCurrentRules.this.getContext()));
             textViewOutcome.setText(rule.getOutcome());
             deleteRuleButton.setVisibility(showIconDelete ? View.VISIBLE : View.GONE);
+            parentView.setVisibility(rule.isVisible() ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -185,6 +222,4 @@ public class FragmentCurrentRules extends Fragment {
             super(itemView);
         }
     }
-
-
 }

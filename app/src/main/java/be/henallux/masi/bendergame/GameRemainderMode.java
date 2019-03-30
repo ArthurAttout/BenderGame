@@ -135,6 +135,10 @@ public class GameRemainderMode extends AppCompatActivity {
             //Dismiss delete mode
             gameRemainderViewModel.showDeleteIcon.setValue(false);
         }
+        else
+        {
+            super.onBackPressed();
+        }
     }
 
     @Override
