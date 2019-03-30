@@ -94,7 +94,7 @@ public class ConditionContains extends Condition implements Parcelable {
     public HashMap<String, Object> getHashMap() {
         HashMap<String, Object> map = new HashMap<>();
         map.put(Constants.JSONFields.FIELD_TYPE, EnumTypeCondition.CONTAINS);
-        map.put(Constants.JSONFields.FIELD_VALUES, value.toArray());
+        map.put(Constants.JSONFields.FIELD_VALUES, value);
         return map;
     }
 
