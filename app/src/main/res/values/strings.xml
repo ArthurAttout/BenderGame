@@ -9,7 +9,7 @@
     <string name="mode_no_real_dice">Sans dés réels</string>
     <string name="dialog_title">Aide</string>
     <string name="dialog_message">
-        <b>Aide-mémoire</b>\n\nL\'application sert à enregistrer les règles au fur et à mesure du jeu, et à déterminer quelle règle doit être appliquée lorsq\'une combinaison de dés est lancée.\n\n\n<b>Sans dés réels</b>\n\nL\'application simule des lancers de dés. Les fonctions du mode aide-mémoire s\'appliquent toujours (à n\'utiliser que si les joueurs n\'ont pas de vrais dés).\n\n<b>Un seul téléphone</b>\n\nLe téléphone est placé au centre de la table, et simule les lancers de dés. Les actions seront affichées automatiquement.
+        <b>Aide-mémoire</b>\n\nL\'application sert à enregistrer les règles au fur et à mesure du jeu, et à déterminer quelle règle doit être appliquée lorsqu\'une combinaison de dés est lancée.\n\n\n<b>Sans dés réels</b>\n\nL\'application simule des lancers de dés. Les fonctions du mode aide-mémoire s\'appliquent toujours (à n\'utiliser que si les joueurs n\'ont pas de vrais dés).\n\n<b>Un seul téléphone</b>\n\nLe téléphone est placé au centre de la table, et simule les lancers de dés. Les actions seront affichées automatiquement.
     </string>
     <string name="confirm_create">confirmer</string>
     <string name="mode_only_one_phone">Un seul téléphone</string>
@@ -92,4 +92,6 @@
     <string name="default_rule_all_drink_title">Plus de 21</string>
     <string name="default_rule_thrower_drinks_title">Moins de 8</string>
     <string name="action_delete_rule">Supprimer une règle</string>
+    <string name="action_rule_deleted">Règle supprimée</string>
+    <string name="action_undo">Annuler</string>
 </resources>
