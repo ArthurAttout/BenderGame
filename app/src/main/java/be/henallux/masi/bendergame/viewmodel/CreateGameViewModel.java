@@ -19,7 +19,7 @@ public class CreateGameViewModel extends ViewModel {
 
     public final MutableLiveData<Mode> availableModes = new MutableLiveData<>();
     public final MutableLiveData<EnumMode> chosenMode = new MutableLiveData<>();
-
+    public final MutableLiveData<String> lastGeneratedKey = new MutableLiveData<>();
 
     public HashMap<String,HashMap> getDefaultRules(Context ctx) {
         return new HashMap<String,HashMap>(){{

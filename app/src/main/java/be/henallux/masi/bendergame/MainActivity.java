@@ -1,11 +1,14 @@
 package be.henallux.masi.bendergame;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -27,6 +30,7 @@ import java.util.Random;
 
 import be.henallux.masi.bendergame.model.Game;
 import be.henallux.masi.bendergame.utils.Constants;
+import be.henallux.masi.bendergame.viewmodel.CreateGameViewModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.fabric.sdk.android.Fabric;
@@ -51,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.progressBarGameID)
     ProgressBar progressBarGameID;
+
+    private CreateGameViewModel viewModel;
+    public static final int REQUEST_CODE_CREATE_GAME = 0x8E6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,9 +99,8 @@ public class MainActivity extends AppCompatActivity {
         buttonCreateGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(
-                        new Intent(MainActivity.this,CreateGameActivity.class),
-                        ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
+                startActivityForResult(
+                    new Intent(MainActivity.this,CreateGameActivity.class), REQUEST_CODE_CREATE_GAME);
             }
         });
 
@@ -146,14 +152,10 @@ public class MainActivity extends AppCompatActivity {
                                 }
 
                             }
-
-
                         }
 
                         @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
+                        public void onCancelled(@NonNull DatabaseError databaseError) {}
                     });
                 }
             }
@@ -166,5 +168,15 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_CODE_CREATE_GAME){
+            if(resultCode == Activity.RESULT_OK){
+                String key = data.getStringExtra("GAME_ID");
+                editTextGameID.setText(key);
+            }
+        }
     }
 }

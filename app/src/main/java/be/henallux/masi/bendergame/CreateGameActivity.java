@@ -1,6 +1,7 @@
 package be.henallux.masi.bendergame;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +37,8 @@ import be.henallux.masi.bendergame.viewmodel.CreateGameViewModel;
 import be.henallux.masi.bendergame.viewmodel.GameRemainderViewModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static be.henallux.masi.bendergame.MainActivity.REQUEST_CODE_CREATE_GAME;
 
 public class CreateGameActivity extends AppCompatActivity {
 
@@ -89,7 +92,6 @@ public class CreateGameActivity extends AppCompatActivity {
                     EnumMode type = EnumMode.valueOf((String)modeMap.get(Constants.JSONFields.FIELD_MODE_NAME));
                     modes.put(entry.getKey(),new Mode(type,isAvailable));
                 }
-
 
                 radioButtonRemainder.setEnabled(false);
                 radioButtonNoRealDice.setEnabled(false);
@@ -153,7 +155,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
             EnumMode mode = viewModel.chosenMode.getValue();
 
-            if(mode != EnumMode.MODE_ONLY_ONE_PHONE){
+            if(mode == EnumMode.MODE_REMAINDER){
                 progressBar.setVisibility(View.VISIBLE);
                 buttonCreateGame.setEnabled(false);
                 firebaseDatabase.child(Constants.JSONFields.FIELD_ROOT_GAME).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -162,6 +164,7 @@ public class CreateGameActivity extends AppCompatActivity {
                         Map<String,Object> games = (Map<String,Object>)dataSnapshot.getValue();
 
                         String newKey = getIDForNewGame(games);
+                        viewModel.lastGeneratedKey.setValue(newKey);
                         progressBar.setVisibility(View.GONE);
                         textViewGameID.setVisibility(View.VISIBLE);
                         textViewGameID.setText(getString(R.string.prefix_generated_id, newKey));
@@ -173,6 +176,11 @@ public class CreateGameActivity extends AppCompatActivity {
                         newGameMap.put(Constants.JSONFields.FIELD_GAME_RULES,viewModel.getDefaultRules(CreateGameActivity.this));
 
                         gamesRef.child(newKey).setValue(newGameMap);
+
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra("GAME_ID",newKey);
+                        setResult(RESULT_OK,returnIntent);
+                        finish();
                     }
 
                     @Override
