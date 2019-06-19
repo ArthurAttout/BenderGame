@@ -94,4 +94,8 @@
     <string name="action_delete_rule">Supprimer une règle</string>
     <string name="action_rule_deleted">Règle supprimée</string>
     <string name="action_undo">Annuler</string>
+    <string name="prefix_condition_sum_even">La somme des dés est un chiffre pair</string>
+    <string name="prefix_condition_sum_odd">La somme des dés est un chiffre impair</string>
+    <string name="type_sum_even_short_descr">Somme paire</string>
+    <string name="type_sum_odd_short_descr">Somme impaire</string>
 </resources>

@@ -68,6 +68,17 @@ public class MainActivity extends AppCompatActivity {
                 int Low = 0;
                 int High = (int)dataSnapshot.getChildrenCount();
                 int i = r.nextInt(High-Low) + Low;
+                firebaseDatabase.getRoot().addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        System.out.println(dataSnapshot.getChildrenCount());
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
                 DatabaseReference welcomeScreenMessage = firebaseDatabase.child("welcomeScreenMessage").child(String.valueOf(i));
                 welcomeScreenMessage.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override

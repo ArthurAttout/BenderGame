@@ -17,5 +17,10 @@ public enum EnumTypeCondition {
     TRIPLE,
     QUADRUPLE,
     SMALL_FLUSH,
-    BIG_FLUSH
+    BIG_FLUSH,
+
+    SUM_EVEN,
+    SUM_ODD,
+    HAS_N_EVEN,
+    HAS_N_ODD
 }

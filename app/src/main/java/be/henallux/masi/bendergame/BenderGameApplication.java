@@ -1,6 +1,7 @@
 package be.henallux.masi.bendergame;
 
 import android.app.Application;
+import android.text.Html;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
