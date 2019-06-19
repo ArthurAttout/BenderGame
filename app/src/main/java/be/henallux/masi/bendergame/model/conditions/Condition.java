@@ -69,8 +69,16 @@ public abstract class Condition implements Parcelable {
             case DOUBLE_DOUBLE:
                 values = convertToArrayListLong(condition.get("values"));
                 return new ConditionDoubleDouble(values.get(0),values.get(1));
+
+            case SUM_EVEN:
+                return new ConditionSumEven();
+
+            case SUM_ODD:
+                return new ConditionSumOdd();
+
+            default:
+                throw new IllegalArgumentException("Unrecognized condition type : " + conditionType);
         }
-        return null;
     }
 
     private static ArrayList<Integer> convertToArrayListLong(Object values) {

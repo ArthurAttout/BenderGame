@@ -34,7 +34,10 @@ import be.henallux.masi.bendergame.model.conditions.ConditionSmallFlush;
 import be.henallux.masi.bendergame.model.conditions.ConditionSumEqual;
 import be.henallux.masi.bendergame.model.conditions.ConditionSumEqualOrBelow;
 import be.henallux.masi.bendergame.model.conditions.ConditionSumEqualOrGreater;
+import be.henallux.masi.bendergame.model.conditions.ConditionSumEven;
+import be.henallux.masi.bendergame.model.conditions.ConditionSumOdd;
 import be.henallux.masi.bendergame.model.conditions.ConditionTriple;
+import be.henallux.masi.bendergame.utils.OnFragmentInteractionListener;
 import be.henallux.masi.bendergame.viewmodel.CreateRuleViewModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -58,22 +61,51 @@ public class StepRuleValueFragment extends Fragment implements Step {
     TextView textViewRulePreview;
 
     private CreateRuleViewModel viewModel;
+    private OnFragmentInteractionListener proceedListener;
 
     @Override
     public VerificationError verifyStep() {
+        if(viewModel.chosenType.getValue() != null && viewModel.chosenType.getValue().equals(EnumTypeCondition.CONTAINS)){
+            if(listener != null){
+                for (Integer integer : listener.getValuesSelected()) {
+                    if(integer != 0)
+                        return null;
+                }
+                return new VerificationError(getString(R.string.error_mandatory_field));
+            }
+        }
         return null;
     }
 
     @Override
     public void onSelected() {
-        //update UI when selected
+        if(viewModel.chosenType.getValue() != null){
+            EnumTypeCondition type = viewModel.chosenType.getValue();
+            if(type.equals(EnumTypeCondition.SUM_ODD) || type.equals(EnumTypeCondition.SUM_EVEN)){
+                proceedListener.onProceed();
+            }
+        }
     }
 
     @Override
     public void onError(@NonNull VerificationError error) {
-        //handle error inside of the fragment, e.g. show error on EditText
+        textViewRulePreview.setError(error.getErrorMessage());
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if(context instanceof OnFragmentInteractionListener){
+            proceedListener = (OnFragmentInteractionListener) context;
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+        proceedListener = null;
+    }
 
     public StepRuleValueFragment() {
         // Required empty public constructor
@@ -86,11 +118,6 @@ public class StepRuleValueFragment extends Fragment implements Step {
         return fragment;
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        listener = null;
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -184,6 +211,11 @@ public class StepRuleValueFragment extends Fragment implements Step {
             case DOUBLE_DOUBLE:
                 showSpinner(2,true);
                 break;
+
+            case SUM_EVEN:
+            case SUM_ODD:
+                showSpinner(0,true);
+                break;
         }
 
         setSpinnerValues(viewModel.chosenValues.getValue());
@@ -191,6 +223,12 @@ public class StepRuleValueFragment extends Fragment implements Step {
 
     private void showSpinner(int value, boolean hasDefaultOption, int min, int max){
         switch (value){
+
+            case 0:
+                spinnerValue1.setVisibility(View.GONE);
+                spinnerValue2.setVisibility(View.GONE);
+                spinnerValue3.setVisibility(View.GONE);
+                spinnerValue4.setVisibility(View.GONE);
             case 1:
                 spinnerValue1.setVisibility(View.VISIBLE);
                 spinnerValue2.setVisibility(View.GONE);
@@ -272,16 +310,20 @@ public class StepRuleValueFragment extends Fragment implements Step {
             this.typeCondition = typeCondition;
         }
 
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            Condition resultingCondition = null;
-
-            ArrayList<Integer> values = new ArrayList<Integer>(){{
+        public ArrayList<Integer> getValuesSelected(){
+            return new ArrayList<Integer>(){{
                 add(getValueInt(spinnerValue1));
                 add(getValueInt(spinnerValue2));
                 add(getValueInt(spinnerValue3));
                 add(getValueInt(spinnerValue4));
             }};
+        }
+
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            Condition resultingCondition = null;
+
+            ArrayList<Integer> values = getValuesSelected();
             int valueInt = values.get(0);
 
             switch (typeCondition){
@@ -315,6 +357,12 @@ public class StepRuleValueFragment extends Fragment implements Step {
                     break;
                 case BIG_FLUSH:
                     resultingCondition = new ConditionBigFlush(valueInt);
+                    break;
+                case SUM_EVEN:
+                    resultingCondition = new ConditionSumEven();
+                    break;
+                case SUM_ODD:
+                    resultingCondition = new ConditionSumOdd();
                     break;
             }
 

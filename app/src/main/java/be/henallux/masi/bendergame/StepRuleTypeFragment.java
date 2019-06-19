@@ -76,6 +76,8 @@ public class StepRuleTypeFragment extends Fragment implements Step {
             add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.CONTAINS));
             add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.BIG_FLUSH));
             add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.SMALL_FLUSH));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.SUM_ODD));
+            add(new EnumTypeConditionBinder(StepRuleTypeFragment.this.getActivity(),EnumTypeCondition.SUM_EVEN));
         }};
         ArrayAdapter spinnerArrayAdapter = new ArrayAdapter(this.getActivity(),R.layout.spinner_dropdown_rule_type, array);
         ruleTypeSpinner.setAdapter(spinnerArrayAdapter);
@@ -138,6 +140,10 @@ public class StepRuleTypeFragment extends Fragment implements Step {
                     return context.getString(R.string.type_small_flush_short_descr);
                 case BIG_FLUSH:
                     return context.getString(R.string.type_great_flush_short_descr);
+                case SUM_EVEN:
+                    return context.getString(R.string.type_sum_even_short_descr);
+                case SUM_ODD:
+                    return getString(R.string.type_sum_odd_short_descr);
                 default:
                     throw new IllegalStateException("Unrecognized type");
             }

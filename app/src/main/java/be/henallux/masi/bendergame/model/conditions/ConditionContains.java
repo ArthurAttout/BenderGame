@@ -32,7 +32,8 @@ public class ConditionContains extends Condition implements Parcelable {
 
     @Override
     public boolean isSatisfied(Collection<Integer> dices) {
-        return dices.containsAll(value);
+        return dices == null || dices.containsAll(value);
+
     }
 
     protected ConditionContains(Parcel in) {
