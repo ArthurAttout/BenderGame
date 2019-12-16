@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Bender Game</string>
     <string name="main_title">Bender Game</string>
-    <string name="game_id">ID de la partie</string>
+    <string name="game_id">IDs de la partie</string>
     <string name="create_game">Créer une partie</string>
     <string name="confirm_join">Confirmer</string>
     <string name="choose_mode">Choix du mode</string>
